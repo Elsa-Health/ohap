@@ -13,8 +13,5 @@
     "model-interpreter": "https://github.com/Elsa-Health/model-interpreter#main",
     "plotly.js-dist-min": "^2.8.3",
     "realm-web": "^1.5.1"
-  },
-  "engines": {
-    "node": "14.x"
   }
 }
