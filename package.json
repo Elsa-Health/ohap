@@ -1,0 +1,17 @@
+{
+  "name": "visual-modeller",
+  "scripts": {
+    "start": "imba -w server.imba",
+    "build": "imba build -P server.imba",
+    "build:server": "imba build server.imba"
+  },
+  "dependencies": {
+    "dotenv": "^14.2.0",
+    "express": "^4.17.1",
+    "imba": "^2.0.0-alpha.199",
+    "lodash": "^4.17.21",
+    "model-interpreter": "https://github.com/Elsa-Health/model-interpreter#main",
+    "plotly.js-dist-min": "^2.8.3",
+    "realm-web": "^1.5.1"
+  }
+}

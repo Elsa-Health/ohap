@@ -1,0 +1,8 @@
+.DS_Store
+node_modules
+dist
+
+realm.ts
+notes.txt
+.env
+.vscode
