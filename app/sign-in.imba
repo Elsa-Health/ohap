@@ -1,4 +1,5 @@
 import { SimpleInput } from './components/simple-input'
+# @ts-expect-error
 import {app} from "./realm.ts"
 
 let loading = false;

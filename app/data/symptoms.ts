@@ -1,5 +1,4 @@
 import _ from "lodash";
-import { createCauchy } from "model-interpreter/dist/lib/distributions";
 const symptomsList = [
   {
     symptom: "fever",

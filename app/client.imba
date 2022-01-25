@@ -4,10 +4,13 @@ import { ConditionEditor } from './screens/condition-editor'
 import { Header } from './components/header'
 import { SimpleInput } from './components/simple-input'
 import {SignIn} from "./sign-in.imba"
+# @ts-expect-error
 import conditions from './data/conditions.ts'
 import { SymptomEditor } from './components/symptom-editor'
+# @ts-expect-error
 import { friendlySymptomName, randomSymptom, toggleCondition } from './utils.ts'
 import { SymptomsTimeline } from './components/symptoms-timeline'
+# @ts-expect-error
 import {conditionsDb, app} from "./realm.ts"
 
 global css html

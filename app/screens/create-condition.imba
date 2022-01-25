@@ -1,4 +1,5 @@
 import { SimpleInput } from '../components/simple-input'
+# @ts-expect-error
 import {conditionsDb, app} from "../realm.ts"
 
 

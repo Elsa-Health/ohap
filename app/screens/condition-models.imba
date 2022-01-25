@@ -1,5 +1,7 @@
 import { SimpleInput } from '../components/simple-input'
+# @ts-expect-error
 import { friendlySymptomName, randomSymptom, toggleCondition } from '../utils.ts'
+# @ts-expect-error
 import { conditionsDb, modelsDb, app} from "../realm.ts"
 import {last} from "lodash"
 

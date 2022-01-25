@@ -1,8 +1,10 @@
+# @ts-expect-error
 import { createPatient, interpret,formatPatient } from 'model-interpreter'
 import symptomsList, { getSymptomByName } from '../data/symptoms'
 import { searchForSymptom, friendlySymptomName } from '../utils'
 # import realm from 'realm-web'
 import { SimpleInput } from './simple-input'
+# @ts-expect-error
 import {modelsDb} from "../realm.ts"
 
 
