@@ -1,4 +1,4 @@
-import Plotly from 'plotly.js-dist-min'
+# import Plotly from 'plotly.js-dist-min'
 
 export tag Histogram
 	prop data = []
@@ -13,7 +13,7 @@ export tag Histogram
 			type: "histogram"
 		}
 
-		Plotly.newPlot("histogramRoot", [trace])
+		# Plotly.newPlot("histogramRoot", [trace])
 		console.log "awaken"
 
 	<self>

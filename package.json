@@ -10,7 +10,6 @@
     "express": "^4.17.1",
     "imba": "^2.0.0-alpha.199",
     "lodash": "^4.17.21",
-    "model-interpreter": "https://github.com/Elsa-Health/model-interpreter#main",
     "plotly.js-dist-min": "^2.8.3"
   }
 }
