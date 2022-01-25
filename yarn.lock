@@ -2,6 +2,13 @@
 # yarn lockfile v1
 
 
+"@elsa-health/model-runtime@^0.1.0":
+  version "0.1.0"
+  resolved "https://registry.yarnpkg.com/@elsa-health/model-runtime/-/model-runtime-0.1.0.tgz#6c5e0f6dbf4dd8cff8614b8b625c419dd19c2437"
+  integrity sha512-oGQ7xsFvTY6pWW2jkxmozEiEjlPhIToK0OTMZnHC5QLGioUbkZNFExSDNOsCEHT1QiFAndSCZkUsjcKM7YRa6A==
+  dependencies:
+    "@stdlib/stats" "^0.0.13"
+
 "@stdlib/array@^0.0.x":
   version "0.0.12"
   resolved "https://registry.yarnpkg.com/@stdlib/array/-/array-0.0.12.tgz#12f40ab95bb36d424cdad991f29fc3cb491ee29e"
@@ -658,12 +665,6 @@ minimist@^1.2.0:
   version "1.2.5"
   resolved "https://registry.yarnpkg.com/minimist/-/minimist-1.2.5.tgz#67d66014b66a6a8aaa0c083c5fd58df4e4e97602"
   integrity sha512-FM9nNUYrRBAELZQT3xeZQ7fmMOBg6nWNmJKTcgsJeaLstP/UODVpGsr5OhXhhXg6f+qtJ8uiZ+PUxkDWcgIXLw==
-
-"model-interpreter@https://github.com/Elsa-Health/model-interpreter#main":
-  version "0.1.0"
-  resolved "https://github.com/Elsa-Health/model-interpreter#a00707d0cdc41706fbc0583552bdce4c086b9adc"
-  dependencies:
-    "@stdlib/stats" "^0.0.13"
 
 ms@2.0.0:
   version "2.0.0"

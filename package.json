@@ -6,11 +6,11 @@
     "build:server": "imba build server.imba"
   },
   "dependencies": {
+    "@elsa-health/model-runtime": "^0.1.0",
     "dotenv": "^14.2.0",
     "express": "^4.17.1",
     "imba": "^2.0.0-alpha.199",
     "lodash": "^4.17.21",
-    "model-interpreter": "https://github.com/Elsa-Health/model-interpreter#main",
     "plotly.js-dist-min": "^2.8.3"
   }
 }

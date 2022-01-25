@@ -1,5 +1,5 @@
 import _, { random } from "lodash";
-import { distributions } from "model-interpreter";
+import { distributions } from "@elsa-health/model-runtime";
 
 const { createCategorical, createCauchy, createNormal } = distributions;
 

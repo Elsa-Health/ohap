@@ -3,7 +3,7 @@ import { Histogram } from './charts/histogram'
 import { searchForSymptom, friendlySymptomName } from '../utils.ts'
 import { SimpleInput } from './simple-input'
 # @ts-expect-error
-import {distributions} from "model-interpreter"
+import {distributions} from "@elsa-health/model-runtime"
 # @ts-expect-error
 import symptomsList, { getSymptomByName, periodicitiesList } from "../data/symptoms.ts"
 import _ from "lodash";

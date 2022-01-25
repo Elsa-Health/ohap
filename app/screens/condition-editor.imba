@@ -58,7 +58,7 @@ export tag ConditionEditor
 			return window.alert("Something is wrong with the condition ID. Please contact support");
 
 		try 
-			const conditionModel = {...state, condition, updatedAt: new Date()}
+			const conditionModel = {...state, updatedAt: new Date()}
 			# const result = await modelsDb.insertOne({
 			# 	...conditionModel
 			# 	upcatedAt: new Date(),

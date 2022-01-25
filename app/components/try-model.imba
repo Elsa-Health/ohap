@@ -1,5 +1,5 @@
 # @ts-expect-error
-import { createPatient, interpret,formatPatient } from 'model-interpreter'
+import { createPatient, interpret,formatPatient } from '@elsa-health/model-runtime'
 import symptomsList, { getSymptomByName } from '../data/symptoms'
 import { searchForSymptom, friendlySymptomName } from '../utils'
 # import realm from 'realm-web'
