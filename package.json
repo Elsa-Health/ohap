@@ -11,7 +11,6 @@
     "imba": "^2.0.0-alpha.199",
     "lodash": "^4.17.21",
     "model-interpreter": "https://github.com/Elsa-Health/model-interpreter#main",
-    "plotly.js-dist-min": "^2.8.3",
-    "realm-web": "^1.5.1"
+    "plotly.js-dist-min": "^2.8.3"
   }
 }
