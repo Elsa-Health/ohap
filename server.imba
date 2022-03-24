@@ -1,8 +1,13 @@
+import { HelpPage } from './app/screens/HelpPage'
 import "dotenv/config";
 import express from 'express'
 import index from './app/index.html'
 
 const app = express!
+
+app.get '/help' do(req, res)
+	res.send String <html> <body>
+		<HelpPage>
 
 # catch-all route that returns our index.html
 app.get(/.*/) do(req,res)

@@ -1,20 +1,29 @@
-import {upperFirst} from "lodash"
+import {upperFirst, min} from "lodash"
+import { adjust, friendlySymptomName } from "../utils.ts"
 
 
-let dayWidth = 30
+let pallete = ["#4665af", "#a85fb4", "#f05793", "#ff7059", "#ffa600"]
+let defaultColor = "#ccc"
+
+
+let dayWidth = 10
 
 tag symptom-item < div
 	prop symptom\Symptom
-	
-	<self[d:flex fls:100]>
-		<div[ai:center pos:relative]>
-			<div>
-				<div[h:1 bgc:blue4 w:{symptom.timeToOnset.scale * 2 * dayWidth} ml:{(symptom.timeToOnset.location - symptom.timeToOnset.scale) * dayWidth} pos:absolute t:8 bgc@hover:blue5 cursor:pointer]>
-					<div[h:5 w:1 bgc:inherit pos:absolute t:-2.2 l:0]>
-					<div[h:5 w:1 bgc:inherit pos:absolute t:-2.2 r:0]>
-				<div[ml:{symptom.timeToOnset.location * dayWidth}]>
-					upperFirst symptom.name
-					<div[w:{dayWidth * symptom.duration.mean} bg:gray3 h:8 bg@hover:gray4 cursor:pointer]> 
+	prop stageIdx\number
+
+
+	def render
+		let bgc = typeof stageIdx === 'number'  ? pallete[stageIdx] : defaultColor
+		<self[d:flex fls:100]>
+			<div[ai:center pos:relative]>
+				<div>
+					<div[h:0.5 bgc:{adjust(bgc, 70)} w:{symptom.timeToOnset.scale * 2 * dayWidth} ml:{(symptom.timeToOnset.location - symptom.timeToOnset.scale) * dayWidth} pos:absolute t:8 bgc@hover:blue5 cursor:pointer]>
+						<div[h:3 w:0.75 bgc:inherit pos:absolute t:-1.2 l:0]>
+						<div[h:3 w:0.75 bgc:inherit pos:absolute t:-1.2 r:0]>
+					<div[ml:{symptom.timeToOnset.location * dayWidth}]>
+						upperFirst(symptom.name)
+						<div[w:{dayWidth * symptom.duration.mean} bg:{bgc} h:8 bg@hover:{adjust(bgc, -20)} cursor:pointer shadow:lg shadow@hover:xl rd:lg]> 
 
 tag time-line
 	prop maxDate
@@ -29,19 +38,32 @@ tag time-line
 
 
 export tag SymptomsTimeline < div
-	css bgc:gray1 ofx:scroll d:flex fld:column rg:3 py:3 pb:6 cursor@active:grabbing
-
-
 	prop symptoms
 	prop selectSymptom
+	prop stages
+	
+	css pt:3
+	
+
+	def getSymptomStage symptom
+		if !stages
+			return 0 
+		if stages.length === 0
+			return 0 
+		else
+			const syStages = stages.filter do(stage)
+				stage.symptoms.includes(symptom.name)
+
+			const stageIds = syStages.map do(stage) 
+				stage.id
+
+			return min(stageIds)
 
 	def getMaxDate symptoms\Symptom[]
 		if (symptoms.length === 0)
 			return 0
-		# let sortedSymptoms = symptoms.sort((do(a, b) (b.timeToOnset.location + b.duration.scale) - (a.timeToOnset.location + a.duration.scale)))
 		let sortedSymptoms = symptoms.sort((do(a, b) (b.timeToOnset.location + b.duration.mean) - (a.timeToOnset.location + a.duration.mean)))
 		let lastSymptom = sortedSymptoms[0]
-		# console.log lastSymptom
 		return lastSymptom.timeToOnset.location + lastSymptom.timeToOnset.scale + lastSymptom.duration.mean + 5
 
 	def handleDragScroll event
@@ -50,8 +72,17 @@ export tag SymptomsTimeline < div
 		# let scrollLeft = self.scrollLeft - dx
 		# self.scrollLeft = scrollLeft
 
-	<self @touch=(handleDragScroll)>
-		for symptom in symptoms
-			<symptom-item @click=(selectSymptom symptom) symptom=symptom>
-		<br />
-		<time-line maxDate=(getMaxDate symptoms)>
+	def render
+		<self @touch=(handleDragScroll)>
+			<div[py:0]>
+				<.text-xl> "Stages"
+				<div[py:1 d:flex]>
+					for stage, idx in stages
+						<div[d:flex pr:4 jc:center ai:center]>
+							<div[h:4 w:4 rd:md bgc:{pallete[idx]}]>
+							<div[pl:1]> friendlySymptomName stage.name
+			<div[bgc:gray1 ofx:scroll d:flex fld:column rg:1 py:3 pb:6 cursor@active:grabbing]>
+				for symptom in symptoms
+					<symptom-item @click=(selectSymptom symptom) symptom=symptom stageIdx=(getSymptomStage symptom)>
+				<br />
+				<time-line maxDate=(getMaxDate symptoms)>

@@ -1,28 +1,38 @@
 import { SimpleInput } from './components/simple-input'
+import {countriesList} from "./data/countries.ts"
 # @ts-expect-error
-import {app} from "./realm.ts"
+import Realm, {app} from "./realm.ts"
 
 let loading = false;
 
+let username = ""
 let email = ""
+let profession = ""
+let country = ""
 let password = ""
 
 export tag SignIn
 	def signUp
-		console.log "clicked"
+		console.log "clicked", password, username, email, profession, country, password
 		loading = true
 
-		const confirmation = window.confirm "Please confirm you email and password."
+		const confirmation = window.confirm "Please confirm your email, password and other details"
 
 		if (!confirmation)
 			loading = false
 			return
 
 		try 
-			const auth = await app.emailPasswordAuth.registerUser(email, password)
-
-			console.log(auth)
-			# window.location.replace("/")
+			const auth = await app.emailPasswordAuth.registerUser({email, password});
+			# 	const emailPasswordUserCredentials = Realm.Credentials.emailPassword(
+			# 		email,
+			# 		password
+			# 	);
+			# 	console.log(app.currentUser.linkCredentials)
+			# 	auth = await app.currentUser.linkCredentials(emailPasswordUserCredentials);
+			
+			console.log(auth, app.currentUser)
+			# window.location.replace("/update-proile")
 		catch error
 			window.alert("Failed to sign up!")
 			console.log error
@@ -46,14 +56,16 @@ export tag SignIn
 
 			loading = false
 
-	<self>
-		<form[w:100 m:auto mt:10%] @submit=submit autocomplete="off">
-			<[fs:32 ta:center mb:2]> "Sign In"
-			<SimpleInput label="Email" name="email" id="email" bind=email type="text">
-			<SimpleInput[mt:2] label="Password" name="password" id="password" bind=password type="text">
+	def render
+		<self>
+			<form[w:100 m:auto mt:10%] @submit=submit autocomplete="off">
+				<[fs:32 ta:center mb:2]> "Sign In"
+				<SimpleInput label="Email" name="email" id="email" bind=email type="text">
+				<SimpleInput[mt:2] label="Password" name="password" id="password" bind=password type="text">
 
-			<button[p:2 w:100% mt:6] disabled=loading> 
-				loading ? "Loading ...":"Sign In"
 
-			<button[p:2 w:100% mt:6] type="button" @click=signUp disabled=loading> 
-				loading ? "Loading ...":"Create Account"
+				<button[p:2 w:100% mt:6] disabled=loading> 
+					loading ? "Loading ...":"Sign In"
+
+				<button[p:2 w:100% mt:6] type="button" @click=signUp disabled=true> 
+					loading ? "Loading ...":"Create Account"

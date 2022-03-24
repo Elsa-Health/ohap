@@ -50,6 +50,9 @@ tag change-input
 			<SimpleInput bind=data.to label="To" type=(data.category === "color" ? "string" : 'number') id="to__"+data.name name="to__"+data.name>
 			<SimpleInput bind=data.duration label="Over (days)" type=(data.category === "color" ? "string" : 'number') id="to__"+data.name name="to__"+data.name>
 
+
+const ageGroupList = ["newborn", "infant", "toddler", "child", "adolescent", "youngAdult", "adult", "senior"]
+
 tag categorical-input
 	prop data\Categorical
 
@@ -58,11 +61,13 @@ tag categorical-input
 		for cat, idx in data.ns
 			<div[d:flex cg:2 my:2] key=idx>
 				<SimpleInput bind=data.ns[idx] label="Category" type='text' id="cat_n__"+idx name="cat_n__"+idx>
-				<SimpleInput bind=data.ps[idx] label="P("+cat+")" type='number' id="cat_p__"+cat name="cat_p__"+cat>
+				<SimpleInput bind=data.ps[idx] label="P("+cat+")" type='text' id="cat_p__"+cat name="cat_p__"+cat>
 
 
 let symptomSearch = searchForSymptom(symptomsList)
 let getSymptom = getSymptomByName(symptomsList)
+
+let noSexDifference = false
 
 let tmpTTO = {
 		start: 0,
@@ -144,9 +149,35 @@ export tag SymptomEditor
 		data.timeToOnset.scale = scale
 
 	def updateLocation key, event
-		const value = event.target.value
+		const value = Number(event.target.value)
 		data.locations[key].alpha = value
 		data.locations[key].beta = 100 - value
+
+	def updateAge key, event
+		const value = Number(event.target.value)
+		data.age[key].alpha = value
+		data.age[key].beta = 100 - value
+
+	def updateSex sex, event
+		const value = Number(event.target.value)
+		
+		data.sex[sex].alpha = value
+		data.sex[sex].beta = 100 - value
+
+	def setEqualSexes evt
+		const equal = evt.target.checked
+		if equal
+			data.sex.male.alpha = 100
+			data.sex.male.beta = 1
+
+			data.sex.female.alpha = 100
+			data.sex.female.beta = 1
+		else 
+			data.sex.male.alpha = 50
+			data.sex.male.beta = 50
+
+			data.sex.female.alpha = 50
+			data.sex.female.beta = 50
 
 
 	def updateBetaNature key, event
@@ -194,11 +225,44 @@ export tag SymptomEditor
 				<input[max-width:100] bind=data.name type='text' id="symptom-name" name="symptom-name">
 
 				if data.name.length > 0
-					<div[d:flex cg:1 mt:1]>
+					<div[d:flex cg:1 mt:1 flw:wrap]>
 						for symptom in symptomSearch(5)(data.name)
-							<div[p:2 bg:blue2 rd:4 cursor:pointer shadow@hover:0 6px 6px 0 rgba(0,0,0,0.2)] @click=(setSymptomTemplate(symptom))>
+							<div[p:2 mb:1 bg:blue2 rd:4 cursor:pointer shadow@hover:0 6px 6px 0 rgba(0,0,0,0.2)] @click=(setSymptomTemplate(symptom))>
 								<small> friendlySymptomName symptom.symptom
 
+			# SEX
+			<section[mt:4]>
+				<div[d:flex cg:10 ai:center]>
+					<.text-xl> 
+						"Sex Presentation"
+				
+				<div[pl:2]>
+					<div[mb:2]>
+						<input type="checkbox" bind=noSexDifference @change=(setEqualSexes)> 
+						"There is no difference between the sexes"
+					<div[mb:2]>
+						"Males experience this symptom "
+						<input[w:14 mt:2] bind=data.sex.male.alpha @change=(updateSex("male", e)) min=0 max=100 type="number"> 
+						"% of the time"
+					<div>
+						"Females experience this symptom "
+						<input[w:14 mt:2] bind=data.sex.female.alpha @change=(updateSex("female", e)) min=0 max=100 type="number"> 
+						"% of the time"
+
+
+			# AGE
+			<section[mt:4]>
+				<div[d:flex cg:10 ai:center]>
+					<.text-xl> 
+						"Age Presentation"
+
+				<div[pl:2]>
+					for group in ageGroupList
+						<div[mb:2]>
+							<span[c:purple9 td:underline]> friendlySymptomName group
+							" experience this symptom "
+							<input[w:14 mt:2] bind=data.age[group].alpha @change=(updateAge(group, e)) min=0 max=100 type="number"> 
+							"% of the time"
 			
 			# TIME TO ONSET
 			<section[mt:4]>
@@ -208,15 +272,15 @@ export tag SymptomEditor
 
 				<div[pl:2]>
 					"On average, It take between "
-					<input[w:12] bind=tmpTTO.start @change=updateTTO type="number">
+					<input[w:12] bind=tmpTTO.start @change=updateTTO min=0 type="number">
 					" and "
-					<input[w:12] bind=tmpTTO.end @change=updateTTO type="number">
+					<input[w:12] bind=tmpTTO.end @change=updateTTO min=tmpTTO.start type="number">
 					" days to start presenting"
 
 
 				# <div[d:flex w:100 cg:2]>
-				# 	<SimpleInput label="Location" bind=data.timeToOnset.location type="number">
-				# 	<SimpleInput label="Scale" bind=data.timeToOnset.scale type="number">
+				# 	<SimpleInput label="Location" bind=data.timeToOnset.location min=0 type="number">
+				# 	<SimpleInput label="Scale" bind=data.timeToOnset.scale min=0 type="number">
 			
 			# LOCATIONS
 			<section[mt:4]>
@@ -229,7 +293,7 @@ export tag SymptomEditor
 					<[w:100]>
 						<SimpleInput label="Name" type="text" bind=loc.name>
 						"Which happens " 
-						<input[w:14 mt:2] defaultValue=loc.alpha @change=(updateLocation(idx, e)) type="number"> 
+						<input[w:14 mt:2] defaultValue=loc.alpha @change=(updateLocation(idx, e)) min=0 max=100 type="number"> 
 						"% of the time."
 						<div[ta:right]>
 							<button type="button" @click=(data.locations.splice(idx, 1))>
@@ -275,11 +339,11 @@ export tag SymptomEditor
 						"Nature"
 					<div[d:flex cg:4]>
 						<small[cursor:pointer c:blue9] @click=(createNature("beta"))> "+ Add Beta Nature"
-						<small[cursor:pointer c:blue9] @click=(createNature("weibull"))> "+ Add Weibull Nature"
-						<small[cursor:pointer c:blue9] @click=(createNature("change"))> "+ Add Changing Nature"
+						# <small[cursor:pointer c:blue9] @click=(createNature("weibull"))> "+ Add Weibull Nature"
+						# <small[cursor:pointer c:blue9] @click=(createNature("change"))> "+ Add Changing Nature"
 
 				<div[d:flex flw:wrap cg:1 rg:1]>
-					for sampleNature in getSymptom(data.name)?.nature || []
+					for sampleNature in (getSymptom(data.name)?.nature || []).filter((do(nat) !data.nature.map((do(n) n.name)).includes(nat)))
 						<div[p:2 bg:blue2 rd:4 cursor:pointer shadow@hover:0 6px 6px 0 rgba(0,0,0,0.2)] @click=(addNature(sampleNature))>
 							<small> friendlySymptomName sampleNature
 				
@@ -377,3 +441,4 @@ export tag SymptomEditor
 
 
 			# <svg[c:blue8 h:10 w:10] src='../assets/human-sample.svg' >
+

@@ -6,3 +6,5 @@ realm.ts
 notes.txt
 .env
 .vscode
+
+.vercel

@@ -1,16 +1,26 @@
 {
-  "name": "visual-modeller",
-  "scripts": {
-    "start": "imba -w server.imba",
-    "build": "imba build -P server.imba",
-    "build:server": "imba build server.imba"
-  },
-  "dependencies": {
-    "@elsa-health/model-runtime": "^0.1.0",
-    "dotenv": "^14.2.0",
-    "express": "^4.17.1",
-    "imba": "^2.0.0-alpha.199",
-    "lodash": "^4.17.21",
-    "plotly.js-dist-min": "^2.8.3"
-  }
+	"name": "visual-modeller",
+	"scripts": {
+		"start": "imba -w server.imba --base.target chrome88",
+		"start:prod": "ls && node ./dist/server.loader.js",
+		"start:new": "imba -w app/index.html",
+		"build": "imba build server.imba --base.target chrome88",
+		"build:new": "imba build app/index.html --base.target chrome88",
+		"build:server": "imba build -P server.imba --base.target chrome88"
+	},
+	"dependencies": {
+		"@elsa-health/model-runtime": "^0.1.1",
+		"axios": "^0.26.1",
+		"date-fns": "^2.28.0",
+		"dotenv": "^16.0.0",
+		"express": "^4.17.3",
+		"imba": "^2.0.0-alpha.201",
+		"lodash": "^4.17.21",
+		"lottie-web": "^5.9.1",
+		"plotly.js-dist-min": "^2.8.3",
+		"realm-web": "^1.7.0"
+	},
+	"devDependencies": {
+		"typescript": "^4.5.4"
+	}
 }

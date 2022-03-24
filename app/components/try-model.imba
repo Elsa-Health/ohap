@@ -1,7 +1,7 @@
 # @ts-expect-error
 import { createPatient, interpret,formatPatient } from '@elsa-health/model-runtime'
 import symptomsList, { getSymptomByName } from '../data/symptoms'
-import { searchForSymptom, friendlySymptomName } from '../utils'
+import { softenSymptomBetas, searchForSymptom, friendlySymptomName } from '../utils'
 # import realm from 'realm-web'
 import { SimpleInput } from './simple-input'
 # @ts-expect-error
@@ -15,6 +15,7 @@ let symptomSearchStr = ""
 
 let patient = createPatient("male", 18, [], [])
 
+let selectedSymptomName = undefined
 # let diseaseModel = null
 
 export tag TryModel
@@ -24,7 +25,6 @@ export tag TryModel
 	selectedSymptomIdx = -1
 	
 	def selectSymptom symptom
-		console.log symptom
 		const exists = patient.symptoms.some((do(sy) sy.name === symptom.symptom));
 		if (!exists)
 			patient.symptoms.push({
@@ -39,39 +39,54 @@ export tag TryModel
 			})
 			symptomSearchStr = ""
 
-	def activeEditSymptom
-		console.log patient.symptoms[selectedSymptomIdx]
+	def openAmplify symptom
+		if selectedSymptomName === symptom.name
+			selectedSymptomName = undefined
+		else
+			selectedSymptomName = symptom.name
 
-		return patient.symptoms[selectedSymptomIdx]
+	def activeEditSymptom
+		let activeSymptom = patient.symptoms.find((do(sy) sy.name === selectedSymptomName))
+		return activeSymptom
 
 	def runAssessment
 		try
 			formattedPatient = formatPatient(patient)
-			
-			# console.log formattedPatient
-			result = interpret(diseaseModel)(formattedPatient)
-			# console.log result
-			return result
+			const softerModel = {...diseaseModel, symptoms: softenSymptomBetas(diseaseModel.symptoms)}
+			# console.log(interpret(false)(softerModel)(formattedPatient))
+			return interpret(false)(softerModel)(formattedPatient)
 		catch err
-			console.log({err})
+			console.error({err})
+			return 0
+
+	def isActive activeSymptom, symptomName
+		return activeSymptom && activeSymptom.name === symptomName
+
+	def unmount
+		selectedSymptomIdx = -1
+		patient = createPatient("male", 18, [], [])
+		symptomSearchStr = ""
 
 	def render
-		activeSymptomTemplate = getSymptom(patient.symptoms[selectedSymptomIdx]?.name);
-			
-		const modelResult = (activeSymptomTemplate && runAssessment()) || 0
+		let activeSymptom = patient.symptoms.find((do(sy) sy.name === selectedSymptomName))
+		const activeSymptomTemplate = activeSymptom && getSymptom(activeSymptom.name);
+		const modelResult = runAssessment() || 0
+
+		console.log({activeSymptomTemplate})
 		
 
 		<self>
 			<[fs:xx-large]>
-				"Try the Model" + modelResult
+				"Try the Model"
 
 			<div[mt:2]>
-				for symptoms, idx in patient.symptoms
-					<span[mr: 1 p:2 bg:blue3 rd:md cursor:pointer] @click=(selectedSymptomIdx = idx)>
-						friendlySymptomName symptoms.name
+				for symptom, idx in patient.symptoms
+					<span[mr: 1 p:2 rd:md cursor:pointer bg:blue2] [bg:blue5 c:white]=isActive(activeSymptom, symptom.name) @click=(openAmplify(symptom))>
+						friendlySymptomName symptom.name
 
 			<div[w:100 mt:4]>
-				<SimpleInput bind=symptomSearchStr label="Symptom Name">
+				<form autocomplete="off">
+					<SimpleInput bind=symptomSearchStr label="Symptom Name">
 				if symptomSearchStr.length > 0
 					<div[d:flex flw:wrap rg:1 cg:1 mt:1]>
 						for symptom in symptomSearch(5)(symptomSearchStr)
@@ -79,60 +94,68 @@ export tag TryModel
 								<small> friendlySymptomName symptom.symptom
 
 
-			if selectedSymptomIdx >= 0
-				<div[mt:2 w:150]>
-					<SimpleInput bind=activeEditSymptom().duration type="number" label="Duration">
-					
-					<div[mb:3]>
-						<[fs:large mb:2]> 
-							"Locations"
-						<div>
-							for option in activeSymptomTemplate.location
-								<label[mr:2]>
-									<input type='checkbox' bind=patient.symptoms[selectedSymptomIdx].location value=option/>
-									<span[pl:1]> friendlySymptomName option
+			<div[d:grid gtc:2]>
+				<div>
+					if selectedSymptomName && activeSymptomTemplate
+						<div[mt:2]>
+							<SimpleInput bind=activeEditSymptom().duration type="number" label="Duration">
+							
+							<div[mb:3]>
+								<[fs:large mb:2]> 
+									"Locations"
+								<div>
+									for option in activeSymptomTemplate.locations
+										<label[mr:2]>
+											<input type='checkbox' bind=activeSymptom.location value=option/>
+											<span[pl:1]> friendlySymptomName option
 
-					<div[mb:3]>
-						<[fs:large mb:2]> 
-							"Onset"
-						<div>
-							for option in activeSymptomTemplate.onset
-								<label[mr:2]>
-									<input type='checkbox' bind=patient.symptoms[selectedSymptomIdx].onset value=option/>
-									<span[pl:1]> friendlySymptomName option
+							<div[mb:3]>
+								<[fs:large mb:2]> 
+									"Onset"
+								<div>
+									for option in activeSymptomTemplate.onset
+										<label[mr:2]>
+											<input type='checkbox' bind=activeSymptom.onset value=option/>
+											<span[pl:1]> friendlySymptomName option
 
-					<div[mb:3]>
-						<[fs:large mb:2]> 
-							"Nature"
-						<div>
-							for option in activeSymptomTemplate.nature
-								<label[mr:2]>
-									<input type='checkbox' bind=patient.symptoms[selectedSymptomIdx].nature value=option/>
-									<span[pl:1]> friendlySymptomName option
+							<div[mb:3]>
+								<[fs:large mb:2]> 
+									"Nature"
+								<div>
+									for option in activeSymptomTemplate.nature
+										<label[mr:2]>
+											<input type='checkbox' bind=activeSymptom.nature value=option/>
+											<span[pl:1]> friendlySymptomName option
 
-					<div[mb:3]>
-						<[fs:large mb:2]>
-							"Periodicity"
-						<div>
-							for option in activeSymptomTemplate.periodicity
-								<label[mr:2]>
-									<input type='checkbox' bind=patient.symptoms[selectedSymptomIdx].periodicity value=option/>
-									<span[pl:1]> friendlySymptomName option
+							<div[mb:3]>
+								<[fs:large mb:2]>
+									"Periodicity"
+								<div>
+									for option in activeSymptomTemplate.periodicity
+										<label[mr:2]>
+											<input type='checkbox' bind=activeSymptom.periodicity value=option/>
+											<span[pl:1]> friendlySymptomName option
 
-					<div[mb:3]>
-						<[fs:large mb:2]>
-							"Aggravators"
-						<div>
-							for option in activeSymptomTemplate.aggravators
-								<label[mr:2]>
-									<input type='checkbox' bind=patient.symptoms[selectedSymptomIdx].aggravators value=option/>
-									<span[pl:1]> friendlySymptomName option
+							<div[mb:3 d:{activeSymptomTemplate.aggravators.length > 0 ? "inherit" : "none"}]>
+								<[fs:large mb:2]>
+									"Aggravators"
+								<div>
+									for option in activeSymptomTemplate.aggravators
+										<label[mr:2]>
+											<input type='checkbox' bind=activeSymptom.aggravators value=option/>
+											<span[pl:1]> friendlySymptomName option
 
-					<div[mb:3]>
-						<[fs:large mb:2]>
-							"Releivers"
-						<div>
-							for option in activeSymptomTemplate.relievers
-								<label[mr:2]>
-									<input type='checkbox' bind=patient.symptoms[selectedSymptomIdx].relievers value=option/>
-									<span[pl:1]> friendlySymptomName option
+							<div[mb:3 d:{activeSymptomTemplate.relievers.length > 0 ? "inherit" : "none"}]>
+								<[fs:large mb:2]>
+									"Releivers"
+								<div>
+									for option in activeSymptomTemplate.relievers
+										<label[mr:2]>
+											<input type='checkbox' bind=activeSymptom.relievers value=option/>
+											<span[pl:1]> friendlySymptomName option
+
+				<div[mt:2]>
+					<[fs:x-large]> 
+						# <pre>
+						# JSON.stringify(softenSymptomBetas(diseaseModel.symptoms), null, 2)
+						modelResult
