@@ -75,12 +75,13 @@ export tag SymptomsTimeline < div
 	def render
 		<self @touch=(handleDragScroll)>
 			<div[py:0]>
-				<.text-xl> "Stages"
-				<div[py:1 d:flex]>
-					for stage, idx in stages
-						<div[d:flex pr:4 jc:center ai:center]>
-							<div[h:4 w:4 rd:md bgc:{pallete[idx]}]>
-							<div[pl:1]> friendlySymptomName stage.name
+				if stages && stages.length > 0
+					<.text-xl> "Stages"
+					<div[py:1 d:flex]>
+						for stage, idx in stages
+							<div[d:flex pr:4 jc:center ai:center]>
+								<div[h:4 w:4 rd:md bgc:{pallete[idx]}]>
+								<div[pl:1]> friendlySymptomName stage.name
 			<div[bgc:gray1 ofx:scroll d:flex fld:column rg:1 py:3 pb:6 cursor@active:grabbing]>
 				for symptom in symptoms
 					<symptom-item @click=(selectSymptom symptom) symptom=symptom stageIdx=(getSymptomStage symptom)>

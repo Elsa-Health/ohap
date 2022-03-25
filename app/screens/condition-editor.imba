@@ -9,6 +9,7 @@ import { SliderInput } from '../components/slider-input.imba'
 import {AssessmentInteract} from "../components/assessment-interact.imba"
 import {last} from "lodash"
 import Realm, {modelsDb, app} from "../realm.ts"
+import { commentsDb } from "../realm.ts"
 import axios from "axios"
 
 import {dummyModel} from "../data/dummyModel"
@@ -55,8 +56,13 @@ const sortByEarliest = do(symptoms\Symptom[])
 let showSymptomWizard = false
 let editSymptom = undefined
 
+let showCommentDialogue = false
+
 # Indicates whether the model is in saving progress or not
 let savingModel = false
+
+let comments = []
+let expandedComments = false
 
 export tag ConditionEditor
 
@@ -204,6 +210,11 @@ export tag ConditionEditor
 		state = res
 		loadingConditionModel = false
 
+		if res && res._id
+			const comms = await commentsDb.find({ referenceId: res._id })
+			console.log comms
+			comments = comms
+
 	def unmount
 		loadingConditionModel = true
 
@@ -215,6 +226,10 @@ export tag ConditionEditor
 			<div[d:{savingModel ? "none" : "block"}]>
 				if showSymptomWizard
 					<NewSymptomWizardModal stages=(state.stages) conditionName=(state.condition) submitSymptom=(submitSymptom) editSymptom=symptomState cancel=(cancelSymptomWizard)>
+
+				if showCommentDialogue && state && state._id
+					<ModelCommentDialogue cancel=(do() showCommentDialogue=false) model=state>
+
 				<div[mb:4]>
 					<[fs:xx-large mb:0]> 
 						friendlySymptomName state.condition
@@ -236,14 +251,96 @@ export tag ConditionEditor
 								<button> "Add Sign"
 								<button @click=saveModel> "Save Model"
 								<button @click=deleteModel> "Delete Model"
-							else
-								<button @click=(do() window.alert("Feature is coming soon"))> "Comment"
+							if app.currentUser
+								<button @click=(showCommentDialogue = true)> "Comment"
 							<button @click=downloadModel> "Download"
 						<SymptomsTimeline selectSymptom=selectSymptom symptoms=sortByEarliest(state.symptoms) stages=(state.stages)>
-						
-						
-						<div[pt:16]>
+					
+						<div[pt:4]>
+							<div[d:flex]>
+								<div[pr:4]> "Comments: " + comments.length
+								<div[td:underline c:blue5 cursor:pointer] @click=(do() expandedComments = !expandedComments)> expandedComments ? "Hide" : "Show"
+							if expandedComments
+								<div[mt:2]>
+									for comment in comments
+										<div[pb:3]>
+											"Author: " + comment.ownerEmail
+											<br>
+											"Title: " + comment.title
+											<br>
+											"Comment: " + comment.comment
+						<div[pt:10]>
 							<.text-2xl> "Try running the model here"
 							<AssessmentInteract diseaseModels=[state]>
 
+tag ModelCommentDialogue
+	css h:100vh pos:fixed bg:rgba(10,10,10,0.4) l:0 t:0 w:100vw zi:9999 transition-duration:0.5s tween:ease-in ofy:scroll
+	prop model
+	prop cancel
+	conditionName = "Tinea Nigra"
 
+	title = ""
+	referenceType = "model" # model | vignette | dataset
+	referenceId = model && model._id
+	isBug = false
+	isFeatureRequest = false
+	status = "open"
+	comment = ""
+	createdAt = new Date();
+	updatedAt = new Date();
+
+	def submit evt
+		evt.preventDefault!
+		const user = app.currentUser
+
+		const comment = {
+			title,
+			referenceType,
+			referenceId: model._id,
+			isBug,
+			ownerId: user.id,
+			ownerEmail: user.profile.email || ""
+			isFeatureRequest,
+			status,
+			comment,
+			createdAt : new Date(),
+			updatedAt : new Date(),
+		}
+
+		try
+			await commentsDb.insertOne({ ...comment })
+			window.alert "Comment successfully added"
+			cancel!
+		catch error
+			console.error({error})
+
+	def render
+		console.log title, isBug, isFeatureRequest, referenceId, model._id, comment
+		<self>
+			<div[bgc:white w@md:50vw m:auto mt@md:10vh p:4 rd:md shadow:lg min-height@md:30vh]>
+				<[fs:2xl]> "Leave a Comment" 
+
+				<form[pt:2] @submit=submit>
+					<label>
+						"Title"
+						<input.simple-input bind=title>
+
+
+					<div[my:3]>
+						<label for="isBug">
+							<input id="isBug" type="checkbox" checked=isBug @change=(isBug = !isBug)>
+							<span> "Found something wrong"
+
+
+					<div[my:3]>
+						<label>
+							<input type="checkbox" bind=isFeatureRequest>
+							<span> "Suggesting an improvment"	
+
+
+					<div[my:3]>
+						<textarea[w:100%] placeholder="Your comment goes here" name="comment" rows="4" bind=comment>
+
+
+					<button[mr:4] type="button" @click=cancel> "Cancel"
+					<button> "Submit"

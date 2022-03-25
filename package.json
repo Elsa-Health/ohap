@@ -1,5 +1,9 @@
 {
 	"name": "visual-modeller",
+	"version": "0.0.8",
+	"engines": {
+		"node": "16.13.0"
+	},
 	"scripts": {
 		"start": "imba -w server.imba --base.target chrome88",
 		"start:prod": "ls && node ./dist/server.loader.js",
