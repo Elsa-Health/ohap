@@ -1,6 +1,7 @@
 import { SimpleInput } from '../components/simple-input'
 # @ts-expect-error
 import {conditionsDb, app} from "../realm.ts"
+import { lowerCase, kebabCase } from "lodash"
 
 
 
@@ -25,6 +26,7 @@ export tag CreateCondition
 		try 
 			const result = await conditionsDb.insertOne({
 				...condition
+				name: kebabCase(lowerCase(condition.name)),
 				ownerId: app.currentUser.id,
 				ownerEmail: app.currentUser.profile.email,
 				ownerName: app.currentUser.customData.username || ""

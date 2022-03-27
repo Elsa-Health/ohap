@@ -10,7 +10,8 @@
 		"start:new": "imba -w app/index.html",
 		"build": "imba build server.imba --base.target chrome88",
 		"build:new": "imba build app/index.html --base.target chrome88",
-		"build:server": "imba build -P server.imba --base.target chrome88"
+		"build:server": "imba build -P server.imba --base.target chrome88",
+		"deploy": "flyctl --app model-builder deploy"
 	},
 	"dependencies": {
 		"@elsa-health/model-runtime": "^0.1.1",

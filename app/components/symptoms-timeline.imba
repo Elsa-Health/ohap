@@ -18,7 +18,7 @@ tag symptom-item < div
 		<self[d:flex fls:100]>
 			<div[ai:center pos:relative]>
 				<div>
-					<div[h:0.5 bgc:{adjust(bgc, 70)} w:{symptom.timeToOnset.scale * 2 * dayWidth} ml:{(symptom.timeToOnset.location - symptom.timeToOnset.scale) * dayWidth} pos:absolute t:8 bgc@hover:blue5 cursor:pointer]>
+					<div[h:0.5 bgc:{adjust(bgc, 70)} w:{symptom.timeToOnset.scale * 2 * dayWidth} ml:{(symptom.timeToOnset.location - symptom.timeToOnset.scale) * dayWidth} pos:absolute t:8 bgc@hover:{adjust(bgc, -10)} cursor:pointer]>
 						<div[h:3 w:0.75 bgc:inherit pos:absolute t:-1.2 l:0]>
 						<div[h:3 w:0.75 bgc:inherit pos:absolute t:-1.2 r:0]>
 					<div[ml:{symptom.timeToOnset.location * dayWidth}]>

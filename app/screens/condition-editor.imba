@@ -251,7 +251,7 @@ export tag ConditionEditor
 								<button> "Add Sign"
 								<button @click=saveModel> "Save Model"
 								<button @click=deleteModel> "Delete Model"
-							if app.currentUser
+							if app.currentUser && app.currentUser.data
 								<button @click=(showCommentDialogue = true)> "Comment"
 							<button @click=downloadModel> "Download"
 						<SymptomsTimeline selectSymptom=selectSymptom symptoms=sortByEarliest(state.symptoms) stages=(state.stages)>
