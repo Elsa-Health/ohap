@@ -8,7 +8,8 @@ let symptomSearch = searchForSymptom(symptomsList)
 let getSymptom = getSymptomByName(symptomsList)
 
 
-let patient = createPatient("male", 18, [], [])
+let age = 100
+let sex = "female"
 
 # HACK!
 let symptomsOrder = []
@@ -19,6 +20,7 @@ export tag AssessmentInteract
 
 	prop diseaseModels
 
+	patient = createPatient(sex, age, [], [])
 	symptomSearchStr = ""
 	activeEditSymptom = ""
 
@@ -58,7 +60,9 @@ export tag AssessmentInteract
 	def mount
 		symptomsOrder = []
 		activeEditSymptom = ""
-		patient = createPatient("male", 18, [], [])
+		# sex = "female"
+		# age = 12
+		patient = createPatient(sex, age, [], [])
 		tick!
 
 	def render
@@ -68,11 +72,25 @@ export tag AssessmentInteract
 		const activePatientSymptom = ast ? patient.symptoms.find((do(sy) sy.name === ast.symptom)) : null
 		const aps = activePatientSymptom
 
+		pt = createPatient(sex, age, patient.symptoms, patient.signs)
+
 		<self>
 			<div[d:grid gtc:2]>
 				<div[pr:10]>
 					<div>
-						<.text-xl> "Add new symptom"
+						<label>
+							"Patient Age:"
+							<input.simple-input bind=age />
+
+						<br>
+						<label[mt:2]>
+							"Patient Sex:"
+							<br>
+							<select[mt:1 h:8 w:60] bind=sex>
+								<option value="male"> "Male"
+								<option value="female"> "Female"
+					<div[pt:4]>
+						<.text-lg> "Add new symptom"
 
 					<SimpleSearchBox bind=symptomSearchStr>
 
@@ -140,7 +158,7 @@ export tag AssessmentInteract
 												<button .active-option=(aps.relievers.includes(rel)) @click=(chooseOption activeEditSymptom, "relievers", rel) type="button"> friendlySymptomName rel
 
 				<div>
-					<assessment-likelihoods-visual diseaseModels=diseaseModels>
+					<assessment-likelihoods-visual diseaseModels=diseaseModels patient=pt>
 
 
 
@@ -170,6 +188,7 @@ tag probability-bar
 
 tag assessment-likelihoods-visual
 	prop diseaseModels
+	prop patient
 
 	def runAllAssessments
 		const assessments = []
@@ -186,6 +205,7 @@ tag assessment-likelihoods-visual
 			return 0
 		try
 			formattedPatient = formatPatient(patient)
+			console.log diseaseModel.symptoms
 			const softerModel = {...diseaseModel, symptoms: softenSymptomBetas(diseaseModel.symptoms)}
 			# console.log(interpret(false)(softerModel)(formattedPatient))
 			return interpret(false)(softerModel)(formattedPatient)

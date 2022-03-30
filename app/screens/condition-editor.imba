@@ -126,7 +126,7 @@ export tag ConditionEditor
 				activity: { likes: 0, downloads: 0 } 
 			}
 		}
-		
+		console.log conditionModel.symptoms	
 		const confirmation = window.confirm "Please confirm that you want to save this {conditionModel.name} model";
 		if !confirmation
 			return;

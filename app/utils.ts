@@ -144,6 +144,12 @@ function softenSingleBeta(rv: T.Beta | any) {
 export function softenSymptomBetas(symptoms: T.Symptom[]): T.Symptom[] {
 	return symptoms.map((sy) => ({
 		...sy,
+		sex: _.fromPairs(
+			Object.keys(sy.sex).map((sx) => [sx, softenSingleBeta(sy.sex[sx])])
+		),
+		age: _.fromPairs(
+			Object.keys(sy.age).map((ag) => [ag, softenSingleBeta(sy.age[ag])])
+		),
 		aggravators: sy.aggravators.map(softenSingleBeta),
 		relievers: sy.relievers.map(softenSingleBeta),
 		nature: sy.nature.map(softenSingleBeta),
@@ -182,7 +188,16 @@ export const toggleStringList =
 		return [...list, value];
 	};
 
-
 export function adjust(color: string, amount: number): string {
-    return '#' + color.replace(/^#/, '').replace(/../g, color => ('0'+Math.min(255, Math.max(0, parseInt(color, 16) + amount)).toString(16)).substr(-2));
-} 
+	return (
+		"#" +
+		color
+			.replace(/^#/, "")
+			.replace(/../g, (color) =>
+				(
+					"0" +
+					Math.min(255, Math.max(0, parseInt(color, 16) + amount)).toString(16)
+				).substr(-2)
+			)
+	);
+}

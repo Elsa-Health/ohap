@@ -299,7 +299,7 @@ export tag NewSymptomWizardModal
 								if syState && syState.name.length > 0 
 									"Selected: " + friendlySymptomName syState.name
 
-							if stages.length > 0 && syState && syState.name.length > 0 
+							if stages && stages.length > 0 && syState && syState.name.length > 0 
 								<div[mt:3]>
 									"For which stage are you modeling this symptom currently?"
 									<br>
