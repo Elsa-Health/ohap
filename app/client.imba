@@ -7,6 +7,8 @@ import { CreateCondition } from './screens/create-condition'
 import { CreateConditionModel } from './screens/CreateConditionModel'
 import { ConditionModels } from './screens/condition-models'
 import { ConditionEditor } from './screens/condition-editor'
+import { RunAssessments } from './screens/RunAssessments'
+import { ModelEvaluations } from './screens/ModelEvaluations'
 import { Header } from './components/header'
 import { SimpleInput } from './components/simple-input'
 import {SignIn} from "./sign-in.imba"
@@ -66,6 +68,12 @@ tag app
 
 		<div.container route="/condition/:condition/:id$">
 			<ConditionEditor>
+
+		<div.container route="/condition/:condition/:id/evaluations$">
+			<ModelEvaluations>
+
+		<div.container route="/run-assessments">
+			<RunAssessments>
 
 
 		<div route="/playground$">

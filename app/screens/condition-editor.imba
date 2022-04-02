@@ -140,7 +140,7 @@ export tag ConditionEditor
 		savingModel = true
 		try 
 			const { evaluations, summary } = await benchmarkModel conditionModel
-			conditionModel.metadata.performance = summary
+			conditionModel.metadata.performance = {...summary, evaluations}
 			# const result = await modelsDb.insertOne({
 			# 	...conditionModel
 			# 	upcatedAt: new Date(),
@@ -253,7 +253,11 @@ export tag ConditionEditor
 								<button @click=deleteModel> "Delete Model"
 							if app.currentUser && app.currentUser.data
 								<button @click=(showCommentDialogue = true)> "Comment"
+							
 							<button @click=downloadModel> "Download"
+
+							if state.metadata && state.metadata.performance
+								<button type="button" route-to="/condition/{state.condition}/{state._id.toString()}/evaluations"> "View Evaluation Results"
 						<SymptomsTimeline selectSymptom=selectSymptom symptoms=sortByEarliest(state.symptoms) stages=(state.stages)>
 					
 						<div[pt:4]>

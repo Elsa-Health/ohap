@@ -3,12 +3,14 @@ import symptomsList, { getSymptomByName } from '../data/symptoms'
 import { createPatient, interpret,formatPatient } from '@elsa-health/model-runtime'
 import {SimpleSearchBox} from "./simple-search-box.imba"
 import {softenSymptomBetas} from "../utils"
+import { sortBy } from "lodash"
+import toastr from "toastr"
 
 let symptomSearch = searchForSymptom(symptomsList)
 let getSymptom = getSymptomByName(symptomsList)
 
 
-let age = 100
+let age = 18
 let sex = "female"
 
 # HACK!
@@ -82,13 +84,13 @@ export tag AssessmentInteract
 							"Patient Age:"
 							<input.simple-input bind=age />
 
-						<br>
-						<label[mt:2]>
-							"Patient Sex:"
-							<br>
-							<select[mt:1 h:8 w:60] bind=sex>
-								<option value="male"> "Male"
-								<option value="female"> "Female"
+						<div[mt:2]>
+							<label>
+								"Patient Sex:"
+								<br>
+								<select[mt:1 h:8 w:60] bind=sex>
+									<option value="male"> "Male"
+									<option value="female"> "Female"
 					<div[pt:4]>
 						<.text-lg> "Add new symptom"
 
@@ -158,7 +160,9 @@ export tag AssessmentInteract
 												<button .active-option=(aps.relievers.includes(rel)) @click=(chooseOption activeEditSymptom, "relievers", rel) type="button"> friendlySymptomName rel
 
 				<div>
-					<assessment-likelihoods-visual diseaseModels=diseaseModels patient=pt>
+					<assessment-likelihoods-visual
+						diseaseModels=diseaseModels 
+						patient=pt>
 
 
 
@@ -180,7 +184,8 @@ tag probability-bar
 				<div[pl:2]>
 					p
 
-			<p[mt:1 c:cool8]>
+			# TODO: Add model author information
+			<p[mt:1 mb:0 c:cool8]>
 				label
 
 
@@ -195,7 +200,10 @@ tag assessment-likelihoods-visual
 		for model in diseaseModels
 			assessments.push({
 				p: (runAssessment(model) || 0).toFixed(2)
-				condition: friendlySymptomName model.condition
+				conditionName: friendlySymptomName model.condition
+				condition: model.condition
+				modelId: model._id.toString()
+				modelName: model.name
 			})
 
 		return assessments
@@ -206,8 +214,11 @@ tag assessment-likelihoods-visual
 		try
 			formattedPatient = formatPatient(patient)
 			console.log diseaseModel.symptoms
-			const softerModel = {...diseaseModel, symptoms: softenSymptomBetas(diseaseModel.symptoms)}
-			# console.log(interpret(false)(softerModel)(formattedPatient))
+			const softerModel = {
+				...diseaseModel,
+				symptoms: softenSymptomBetas(diseaseModel.symptoms)
+			}
+
 			return interpret(false)(softerModel)(formattedPatient)
 		catch err
 			console.error({err})
@@ -223,11 +234,20 @@ tag assessment-likelihoods-visual
 			<div>
 				<.text-xl> "Asssessments"
 
-				for likel in likelihoods
-					<div[mt:6]>
-						<probability-bar p=likel.p label=likel.condition>
+				for likel in sortBy(likelihoods, ['p']).reverse!
+					<div[mt:2 p:2 pt:2 rd:sm]>
+						<probability-bar 
+						p=likel.p 
+						label=likel.conditionName>
 
-				# <div[mt:6]>
+						<div[p:2 d:flex c:$blue jc:flex-end fs:sm]>
+							<a[c:$blue tdl:none cursor:pointer] 
+								target="_blank" 
+								href="/condition/{likel.condition}/{likel.modelId}"> "Open Editor"
+							<div[c:$blue cursor:pointer pl:4] 
+							@click=toastr.info("Coming Soon")>
+								"View Reasoning"
+
 				# 	<probability-bar p=0.52 label="Syphillis">
 
 				# <div[mt:6]>
