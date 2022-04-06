@@ -37,7 +37,7 @@ tag time-line
 					<span> day
 
 
-export tag SymptomsTimeline < div
+tag symptoms-timeline 
 	prop symptoms
 	prop selectSymptom
 	prop stages

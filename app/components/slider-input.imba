@@ -15,7 +15,7 @@ export tag SliderInput
 	def render
 		isRange = type == "range"
 		<self[py:2]>
-			<div>
+			<div[fs:1.1rem]>
 				label
 			<div[d:flex ai:center]>
 				<div[pt:6]>

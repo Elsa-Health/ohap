@@ -29,7 +29,7 @@ export tag ModelEvaluations
 			loadingConditionModel = false
 
 			if res && res._id
-				const URL = "https://model-evaluation-server-d3pcdcobha-uc.a.run.app/getById"
+				const URL = "https://model-evaluation-server-d3pcdcobha-uc.a.run.app/vignettes/getByIds"
 				# const URL = "http://localhost:3001/vignettes/getByIds" 
 				const result = await axios.post(URL, {
 					ids: res.metadata.performance.evaluations.map do(e) e.vignetteId

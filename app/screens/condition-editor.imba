@@ -1,8 +1,9 @@
 import { distributions } from '@elsa-health/model-runtime'
 import type { Symptom } from '@elsa-health/model-runtime/dist/public-types'
 import { TryModel } from '../components/try-model'
-import { rescaleList, friendlySymptomName, getSymptomTemplate, searchForSymptom, formatFriendlyModel, formatFriendlySymptom, softenSymptomBetas } from '../utils.ts'
-import { SymptomsTimeline } from '../components/symptoms-timeline'
+import { toggleStringList, rescaleList, friendlySymptomName, getSymptomTemplate, searchForSymptom, formatFriendlyModel, formatFriendlySymptom, softenSymptomBetas } from '../utils.ts'
+import '../components/symptoms-timeline'
+import '../components/condition-investigation-findings'
 import { SymptomEditor } from '../components/symptom-editor'
 import { NewSymptomWizardModal } from '../components/new-symptom-wizard-modal.imba'
 import { SliderInput } from '../components/slider-input.imba'
@@ -30,8 +31,10 @@ let state = {
 	ownerId: "",
 	ownerEmail: ""
 	condition: "",
+	riskFactors: []
 	symptoms: [],
 	signs: [],
+	investigations: [],
 	stages: []
 	# symptoms: [
 	# 	randomSymptom("fever"),
@@ -56,6 +59,9 @@ const sortByEarliest = do(symptoms\Symptom[])
 let showSymptomWizard = false
 let editSymptom = undefined
 
+let showRiskFactorsManager = false
+let showInvestigationsManager = false
+
 let showCommentDialogue = false
 
 # Indicates whether the model is in saving progress or not
@@ -73,7 +79,7 @@ export tag ConditionEditor
 	def deleteModel
 		const confirmation = window.confirm("Are you sure you want to delete this model? This operation cannot be reversed.")
 		if !confirmation
-			return;
+			return
 
 		if !app.currentUser.id
 			return window.alert("You must have an account to delete this model")
@@ -106,14 +112,14 @@ export tag ConditionEditor
 
 	def downloadModel
 		const conditionModel = {...state, condition}
-		const a = document.createElement("a");
+		const a = document.createElement("a")
 		a.href = URL.createObjectURL(new Blob([JSON.stringify(conditionModel, null, 2)], {
 			type: "text/plain"
-		}));
-		a.setAttribute("download", "model-data.json");
-		document.body.appendChild(a);
-		a.click();
-		document.body.removeChild(a);
+		}))
+		a.setAttribute("download", "model-data.json")
+		document.body.appendChild(a)
+		a.click!
+		document.body.removeChild(a)
 
 	def saveModel
 		console.log conditionId
@@ -127,15 +133,15 @@ export tag ConditionEditor
 			}
 		}
 		console.log conditionModel.symptoms	
-		const confirmation = window.confirm "Please confirm that you want to save this {conditionModel.name} model";
+		const confirmation = window.confirm "Please confirm that you want to save this {conditionModel.name} model"
 		if !confirmation
-			return;
+			return
 			
 		if !app.currentUser.id
-			return window.alert("You do not have a user account. Please sign in.");
+			return window.alert("You do not have a user account. Please sign in.")
 
 		if !conditionId || conditionId.length === 0
-			return window.alert("Something is wrong with the condition ID. Please contact support");
+			return window.alert("Something is wrong with the condition ID. Please contact support")
 
 		savingModel = true
 		try 
@@ -148,9 +154,9 @@ export tag ConditionEditor
 			const result = await modelsDb.updateOne({ _id: new Realm.BSON.ObjectID(conditionId) }, {$set: { ...conditionModel }})
 
 			savingModel = false 
-			window.alert(`Successfully created and saved the ${condition} model`);
+			window.alert "Successfully created and saved the {condition} model"
 
-			console.log(result)
+			console.log result
 		catch err
 			console.log "Error:", err
 			savingModel = false 
@@ -158,9 +164,7 @@ export tag ConditionEditor
 
 
 	def selectSymptom symptom
-		# view = "add-symptom"
 		symptomState = symptom
-		console.log("HERE", symptom)
 		editSymptom = symptom
 		showSymptomWizard = true
 
@@ -173,7 +177,12 @@ export tag ConditionEditor
 
 
 	def submitSymptom symptom\Symptom, stages
-		let cleanSymptom = { ...symptom, onset: {...symptom.onset, ps: symptom.onset.ps.map(Number)}, periodicity: {...symptom.periodicity, ps: symptom.periodicity.ps.map(Number)} }
+		let cleanSymptom = {
+			...symptom
+			onset: {...symptom.onset, ps: symptom.onset.ps.map(Number)}
+			periodicity: {...symptom.periodicity, ps: symptom.periodicity.ps.map(Number)} 
+			}
+	
 	
 		# If condition has stages, update the stages
 		if state.multiStage && state.stages.length > 0 && stages
@@ -198,6 +207,11 @@ export tag ConditionEditor
 		showSymptomWizard = false
 		editSymptom = undefined
 
+
+	def saveRiskFactors factors\[]
+		state.riskFactors = factors
+		showRiskFactorsManager = false
+
 	def mount
 		conditionId = last(window.location.pathname.split("/"))
 		if !conditionId || conditionId.length === 0
@@ -205,10 +219,10 @@ export tag ConditionEditor
 
 		# return;
 		# TODO: add try catch
-		const res = await modelsDb.findOne({_id: new Realm.BSON.ObjectID(conditionId)});
-		console.log("STATE: ", res)
-		state = res
+		const res = await modelsDb.findOne({_id: new Realm.BSON.ObjectID(conditionId)})
+		state = {...state, ...res}
 		loadingConditionModel = false
+		console.log("STATE: ", state)
 
 		if res && res._id
 			const comms = await commentsDb.find({ referenceId: res._id })
@@ -223,9 +237,27 @@ export tag ConditionEditor
 		<self>
 			<div[d:{savingModel ? "block" : "none"}]>
 				"Please wait while saving the model"
+
+			if showRiskFactorsManager
+				<manage-risk-factors
+				submit=saveRiskFactors 
+				close=(do showRiskFactorsManager = false)
+				factors=state.riskFactors>
+
+			if showInvestigationsManager
+				<condition-investigation-findings 
+				submit=console.log
+				close=(do showInvestigationsManager = false)
+				investigations=state.investigations>
+
 			<div[d:{savingModel ? "none" : "block"}]>
 				if showSymptomWizard
-					<NewSymptomWizardModal stages=(state.stages) conditionName=(state.condition) submitSymptom=(submitSymptom) editSymptom=symptomState cancel=(cancelSymptomWizard)>
+					<NewSymptomWizardModal 
+						stages=(state.stages) 
+						conditionName=(state.condition) 
+						submitSymptom=(submitSymptom) 
+						editSymptom=symptomState 
+						cancel=(cancelSymptomWizard) >
 
 				if showCommentDialogue && state && state._id
 					<ModelCommentDialogue cancel=(do() showCommentDialogue=false) model=state>
@@ -247,18 +279,19 @@ export tag ConditionEditor
 						<div[d:flex cg:2 mb:3]>
 							# <button @click=(toggleAddSymptom)> "Add Symptom"
 							if app.currentUser.id == state.ownerId
-								<button @click=(showSymptomWizard = true)> "Add Symptom"
-								<button> "Add Sign"
-								<button @click=saveModel> "Save Model"
-								<button @click=deleteModel> "Delete Model"
+								<button.button @click=(showSymptomWizard = true)> "Add Symptom"
+								<button.button @click=(showRiskFactorsManager = true)> "Risk Factors"
+								<button.button @click=(showInvestigationsManager = true)> "Investigations & Findings"
+								<button.button @click=saveModel> "Save Model"
+								<button.button @click=deleteModel> "Delete Model"
 							if app.currentUser && app.currentUser.data
 								<button @click=(showCommentDialogue = true)> "Comment"
 							
-							<button @click=downloadModel> "Download"
+							<button.button @click=downloadModel> "Download"
 
-							if state.metadata && state.metadata.performance
-								<button type="button" route-to="/condition/{state.condition}/{state._id.toString()}/evaluations"> "View Evaluation Results"
-						<SymptomsTimeline selectSymptom=selectSymptom symptoms=sortByEarliest(state.symptoms) stages=(state.stages)>
+							if state.metadata and state.metadata.performance
+								<button.button type="button" route-to="/condition/{state.condition}/{state._id.toString()}/evaluations"> "View Evaluation Results"
+						<symptoms-timeline selectSymptom=selectSymptom symptoms=sortByEarliest(state.symptoms) stages=(state.stages)>
 					
 						<div[pt:4]>
 							<div[d:flex]>
@@ -275,7 +308,7 @@ export tag ConditionEditor
 											"Comment: " + comment.comment
 						<div[pt:10]>
 							<.text-2xl> "Try running the model here"
-							<AssessmentInteract diseaseModels=[state]>
+							<AssessmentInteract diseaseModels=[state] >
 
 tag ModelCommentDialogue
 	css h:100vh pos:fixed bg:rgba(10,10,10,0.4) l:0 t:0 w:100vw zi:9999 transition-duration:0.5s tween:ease-in ofy:scroll
@@ -290,8 +323,8 @@ tag ModelCommentDialogue
 	isFeatureRequest = false
 	status = "open"
 	comment = ""
-	createdAt = new Date();
-	updatedAt = new Date();
+	createdAt = new Date()
+	updatedAt = new Date()
 
 	def submit evt
 		evt.preventDefault!
@@ -348,3 +381,111 @@ tag ModelCommentDialogue
 
 					<button[mr:4] type="button" @click=cancel> "Cancel"
 					<button> "Submit"
+
+
+
+
+let riskFactors = [
+	{ name: "smoking", tags: ["cigarretes"] }
+	{ name: "alcohol-consumption", tags: ["drinking", "alcohol", "drunk"] }
+	{name: "immunocompromised", tags: ["hiv", "immunity"] }
+	{name: "men-who-have-sex-with-men", tags: ["homosexual"] }
+	{name: "diabetic", tags: ["diabetes", "sugar"]}
+	{name: "hypertensive", tags: ["hypertension", "blood", "pressure"]}
+	{name: "infected-person-contact", tags: ["exposure"]}
+	{name: "high-colesterol", tags: ["colesterol", "obesity"] }
+	{name: "unhygenic-living-conditions", tags: ["environment"]}
+	{name: "obesity", tags: ["overweight", "weight", "cholesterol"]}
+	{name: "family-history", tags: ["genetic", "family", "inherit"]}
+	{name: "substance-abuse", tags: ["drugs"]}
+	{name: "organ-transplant", tags: ["transplant", "surgery"]}
+	{name: "sedentary-lifestyle", tags: ["sitting"]}
+]
+
+tag manage-risk-factors
+	prop submit
+	prop factors = []
+	prop close
+
+	searchStr = ""
+
+	def activeFactor name
+		(factors.filter do(f) f.name === name).length > 0
+
+	def searchFilter searchStr, factors
+		if searchStr.length < 1
+			return []
+		factors.filter do(rf)
+			let a = rf.name.toLowerCase().includes searchStr.toLowerCase!
+			let b = rf.tags.join(" ").includes searchStr.toLowerCase!
+			return a or b
+
+	def toggleFactor name
+		const exists? = activeFactor name
+		if exists?
+			searchStr = ""
+			factors = factors.filter do(f) f.name !== name
+		else
+			searchStr = ""
+			fact = distributions.createBeta name, 50, 50
+			factors = [...factors, { name, ...fact }]
+
+
+	def updateFactor name, value
+		console.log name, value
+		factors = factors.map do(f)
+			if f.name === name
+				f.alpha = value
+				f.beta = Math.max(0.001, 100 - value)
+				f
+			else
+				f
+
+	def saveFactors
+		submit factors
+
+
+	def removeFactor name
+		factors = factors.filter do(f)
+			f.name !== name
+
+
+	def render
+		console.log factors
+		<self.modal.is-active>
+			<div.modal-background>
+			<div.modal-content.has-background-white.p-4[rd:md]>
+				<h1.subtitle.is-3> "Risk Factors"
+
+				<label>
+					"Search"
+					<input.input bind=searchStr type="text" placeholder="obese, immunocompromised, ...">
+
+				<div.tags.pt-2>
+					for res in searchFilter(searchStr, riskFactors)
+						<span.tag.is-medium[cursor:pointer] .is-primary=activeFactor(res.name) @click=(toggleFactor res.name)> friendlySymptomName res.name
+
+
+
+				<div.p-1>
+					for pFactor in factors
+						<div.pb-3.is-flex.is-align-items-center.is-justify-content-space-between[fld:row]>
+							<SliderInput 
+								label=(friendlySymptomName pFactor.name )
+								value=pFactor.alpha
+								width=300
+								min=0.001
+								max=100
+								stepSize=0.001
+								gradient
+								type="range"
+								startLabel="Never Causes"
+								endLabel="Always Causes"
+								updateValue=(do(val) updateFactor(pFactor.name, val)) >
+
+							<span[cursor:pointer c@hover:red] @click=(do removeFactor(pFactor.name))> "Remove"
+
+				<div.is-flex.is-justify-content-flex-end>
+					<button.button.mr-3 @click=close> "Cancel"
+					<button.button.is-primary @click=saveFactors> "Save"
+
