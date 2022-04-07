@@ -43,6 +43,18 @@ let state = {
 	# 	],
 }
 
+let resetState = do
+	state = {
+		ownerId: "",
+		ownerEmail: ""
+		condition: "",
+		riskFactors: []
+		symptoms: [],
+		signs: [],
+		investigations: [],
+		stages: []
+	}
+
 let symptomState\Symptom = getSymptomTemplate()
 
 let view = "view-summary"
@@ -122,7 +134,6 @@ export tag ConditionEditor
 		document.body.removeChild(a)
 
 	def saveModel
-		console.log conditionId
 		const conditionModel = {
 			...state, 
 			updatedAt: new Date(), 
@@ -132,7 +143,6 @@ export tag ConditionEditor
 				activity: { likes: 0, downloads: 0 } 
 			}
 		}
-		console.log conditionModel.symptoms	
 		const confirmation = window.confirm "Please confirm that you want to save this {conditionModel.name} model"
 		if !confirmation
 			return
@@ -155,8 +165,6 @@ export tag ConditionEditor
 
 			savingModel = false 
 			window.alert "Successfully created and saved the {condition} model"
-
-			console.log result
 		catch err
 			console.log "Error:", err
 			savingModel = false 
@@ -192,7 +200,6 @@ export tag ConditionEditor
 		if idx === -1
 			state.symptoms.push(cleanSymptom)
 		else
-			console.log "updating"
 			state.symptoms[idx] = cleanSymptom
 
 		# Open the view summary
@@ -212,6 +219,11 @@ export tag ConditionEditor
 		state.riskFactors = factors
 		showRiskFactorsManager = false
 
+
+	def saveInvestigations investigations\[]
+		state.investigations = investigations
+		showInvestigationsManager = false
+
 	def mount
 		conditionId = last(window.location.pathname.split("/"))
 		if !conditionId || conditionId.length === 0
@@ -220,14 +232,16 @@ export tag ConditionEditor
 		# return;
 		# TODO: add try catch
 		const res = await modelsDb.findOne({_id: new Realm.BSON.ObjectID(conditionId)})
+		resetState!
 		state = {...state, ...res}
 		loadingConditionModel = false
 		console.log("STATE: ", state)
 
 		if res && res._id
 			const comms = await commentsDb.find({ referenceId: res._id })
-			console.log comms
 			comments = comms
+
+		tick!
 
 	def unmount
 		loadingConditionModel = true
@@ -246,7 +260,7 @@ export tag ConditionEditor
 
 			if showInvestigationsManager
 				<condition-investigation-findings 
-				submit=console.log
+				submit=saveInvestigations
 				close=(do showInvestigationsManager = false)
 				investigations=state.investigations>
 

@@ -2,17 +2,15 @@ import { friendlySymptomName } from "../utils.ts"
 import { distributions } from "@elsa-health/model-runtime"
 import { investigations as invsList, normalityRangeItems } from "../data/investigations.ts"
 import { SliderInput } from "./slider-input.imba"
+import { CategoricalInput } from "./categorical-input.imba"
 
 let investigationList = invsList.map do(inv)
 	let result
 	if inv.type === "boolean" or inv.type === "normality"
 		result = distributions.createBeta(inv.name, 50, 50)
 	elif inv.type === "number" or inv.type === "range"
-		result = { 
-			high: distributions.createBeta("high", 50, 50)
-			normal: distributions.createBeta("high", 50, 50)
-			low: distributions.createBeta("high", 50, 50)
-		}
+		result = distributions.createCategorical(inv.name, ["high", "normal", "low"], [0,0,0])
+
 	return {
 		...inv,
 		results: result
@@ -61,8 +59,18 @@ tag condition-investigation-findings
 			else
 				inv
 
+	def updateCategoricalInv investigation
+		def update data\{name: string; value:number}[]
+			investigations = investigations.map do(inv)
+				if inv.name === investigation.name
+					for n, idx in inv.results.ns
+						inv.results.ps[idx] = (data.find do(dt) dt.name === n).value
+
+				return inv
+
 
 	def updateComplexInv name, key, value
+		# TODO: Update
 		investigations = investigations.map do(inv)
 			if inv.name === name
 				let result = inv.results[key]
@@ -78,11 +86,10 @@ tag condition-investigation-findings
 
 
 	def render
-		console.log investigations
 		<self.modal.is-active>
 			<div.modal-background>
 			<div.modal-content.has-background-white.p-4[rd:md]>
-				<h1.subtitle.is-3> "Investigations & Findings"
+				<h1.subtitle.is-3> "Investigation Findings"
 
 
 				<label>
@@ -122,21 +129,9 @@ tag condition-investigation-findings
 									elif inv.type === ""
 										<input.input bind=inv.result.value />
 									elif inv.type === "range" or inv.type === "number"
-										for rItem in normalityRangeItems
-											<SliderInput
-												label="{friendlySymptomName rItem}"
-												value=inv.results[rItem].alpha
-												min=0.0001
-												max=100
-												width=400
-												type="range"
-												gradient
-												stepSize=0.001
-												startLabel="Never Happens"
-												endLabel="Always Happens"
-												updateValue=(do(val) updateComplexInv inv.name, rItem, val)
-											>
-
+										<CategoricalInput 
+										data=(inv.results.ns.map do(item, idx) ({ name: item, value: inv.results.ps[idx] })) 
+										onChangeValues=(updateCategoricalInv(inv)) label=("") >
 									elif inv.type === "normality"
 										<SliderInput
 											label=""
@@ -170,13 +165,11 @@ tag collapsible
 
 	open = false
 
-
 	def toggleOpen
 		open = !open
 
 	def remove
 		onRemove!
-
 
 
 	<self>
@@ -185,7 +178,7 @@ tag collapsible
 			<h4.mb-0[fs:1.3rem]> title
 
 			<div[ml:10 fg:1 c:black flex:1 text-align:right]>
-				<span[cursor:pointer c@hover:red] @click=remove> "Remove"
+				<span[cursor:pointer c@hover:red] @click=remove > "Remove"
 
 		if open
 			<div[mt:-3 pl:10]>

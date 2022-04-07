@@ -23,9 +23,9 @@ let viewTransitions = {
 	11: "summary"
 }
 
-let activeStage = null;
+let activeStage = null
 
-let addingCombination = false;
+let addingCombination = false
 let combinationsList\string[] = []
 let tmpTTO = {
 		start: 0,
@@ -52,17 +52,15 @@ export tag NewSymptomWizardModal
 		stages = stages.map do(stage)
 			if stage.id == stageId
 				updatedSymptoms = toggleStringList(stage.symptoms)(syState.name)
-				console.log "Updates:", updatedSymptoms
 				return {...stage, symptoms: updatedSymptoms} 
 			else
 				return stage
 
 
 	def transition
-		console.log "called"
 		screensCount = keys(viewTransitions).length
 		let nextScreenIndex = currentTransition + 1
-		let lastScreenIdx = Object.keys(viewTransitions).length - 2;
+		let lastScreenIdx = Object.keys(viewTransitions).length - 2
 
 		for idx in [nextScreenIndex ... lastScreenIdx]
 			const screen = viewTransitions[idx]
@@ -74,7 +72,7 @@ export tag NewSymptomWizardModal
 					if idx === lastScreenIdx
 						# we are on the last screen. jump to summary
 						nextScreenIndex = lastScreenIdx + 1
-						break;
+						break
 					continue
 			else
 				break
@@ -89,7 +87,7 @@ export tag NewSymptomWizardModal
 		# save the symptom state
 		submitSymptom formatFriendlySymptom(syState), stages 
 
-		return;
+		return
 
 	def setSymptom symptom
 		let sy = getSymptomTemplate()
@@ -122,7 +120,6 @@ export tag NewSymptomWizardModal
 		combinationsList = []
 
 	def stopAddMultipleNatures
-		console.log combinationsList
 		const natures = distributions.createBeta(combinationsList, 100, 1, { dist: "beta", combination: true })
 
 		syState.nature.push(natures)
@@ -142,7 +139,7 @@ export tag NewSymptomWizardModal
 
 		let natIdx = syState.nature.findIndex((do(nat) nat.name === name))
 		if (natIdx <= -1)
-			return;
+			return
 
 		syState.nature[natIdx].alpha = Math.max(0.0001, value)
 		syState.nature[natIdx].beta = Math.max(0.0001, 100 - value)
@@ -153,7 +150,7 @@ export tag NewSymptomWizardModal
 
 		let natIdx = syState.aggravators.findIndex((do(nat) nat.name === name))
 		if (natIdx <= -1)
-			return;
+			return
 
 		syState.aggravators[natIdx].alpha = Math.max(0.0001, value)
 		syState.aggravators[natIdx].beta = Math.max(0.0001, 100 - value)
@@ -163,7 +160,7 @@ export tag NewSymptomWizardModal
 
 		let natIdx = syState.relievers.findIndex((do(nat) nat.name === name))
 		if (natIdx <= -1)
-			return;
+			return
 
 		syState.relievers[natIdx].alpha = Math.max(0.0001, value)
 		syState.relievers[natIdx].beta = Math.max(0.0001, 100 - value)
@@ -182,9 +179,9 @@ export tag NewSymptomWizardModal
 
 	def updatePeriodicity period, event
 		# FIXME: This functions produces wrong periodicity categorical values in the ps list
-		const periodIdx = syState.periodicity.ns.indexOf(period);
+		const periodIdx = syState.periodicity.ns.indexOf(period)
 		if periodIdx < 0
-			return;
+			return
 		
 		const totalProbabilities = syState.periodicity.ps
 		totalProbabilities[periodIdx] = Number(event.target.value)
@@ -197,8 +194,6 @@ export tag NewSymptomWizardModal
 		def update data\{name:string;value:number}[]
 			const per = syState.periodicity
 
-			console.log {data}
-		
 			per.ns.map do(name, idx)
 				const item = data.find do(item) item.name == name
 				if item
@@ -208,7 +203,6 @@ export tag NewSymptomWizardModal
 					per.ns = per.ns.filter do(item) item != name
 
 
-			console.log per
 			syState.periodicity = per
 
 	def removePeriodicity idx
@@ -226,7 +220,6 @@ export tag NewSymptomWizardModal
 	def updateOnset syState
 		return def update val
 			value = val / 100
-			console.log value, syState
 			syState.onset.ps[1] = value
 			syState.onset.ps[0] = 1 - value
 
@@ -246,17 +239,16 @@ export tag NewSymptomWizardModal
 		let mu = mean([start, end])
 		let scale = Math.abs(mu - end)
 
-		syState.timeToOnset.location = mu;
+		syState.timeToOnset.location = mu
 		syState.timeToOnset.scale = scale
 
 	def mount
 		if editSymptom !== undefined
-			console.log editSymptom.name
 			syState = editSymptom
 			syTemplate = getSymptomByName(symptomsList)(editSymptom.name) || undefined
 
 			const { location, scale } = editSymptom.timeToOnset
-			tmpTTO.start = location - scale;
+			tmpTTO.start = location - scale
 			tmpTTO.end = location + scale
 
 			currentTransition = syTemplate ? 1 : 0

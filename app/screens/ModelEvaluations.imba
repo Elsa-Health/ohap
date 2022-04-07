@@ -79,7 +79,7 @@ tag VignetteEvaluationItem
 
 			<div>
 				<> 
-					"Prediction: {(vEvaluation.p * 100).toFixed(2)}% +/- {vEvaluation.variance.toFixed(2)}"
+					"Prediction: {(vEvaluation.p * 100).toFixed(2)}% +/- {(vEvaluation.variance || 0).toFixed(2)}"
 
 
 			if showVignette
