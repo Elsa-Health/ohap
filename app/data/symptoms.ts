@@ -2075,10 +2075,23 @@ const symptomsList = [
 		relievers: ["not-drinking-water"],
 	},
 	{
-		symptom: "urgent-urination",
+		symptom: "urinating-urgency",
 		description:
 			"Urination urgency is a strong and sudden need to urinate.",
 		tags: ["urine", "urgent", "sudden" "urgency"],
+		location: [],
+		duration: ["less-than-two-weeks", "more-than-two-weeks"],
+		onset: ["sudden", "gradual"],
+		nature: [],
+		periodicity: ["non-specific", "morning", "night", "intermittent"],
+		aggravators: ["drinking-water"],
+		relievers: ["not-drinking-water"],
+	},
+	{
+		symptom: "feeling-incomplete-bladder-emptying",
+		description:
+			"The subjective feeling of not completely emptying of the blader after urination.",
+		tags: ["urine", "empty", "not empty", "finsih" "bladder" "retention"],
 		location: [],
 		duration: ["less-than-two-weeks", "more-than-two-weeks"],
 		onset: ["sudden", "gradual"],
