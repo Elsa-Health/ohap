@@ -2061,6 +2061,32 @@ const symptomsList = [
 		aggravators: ["not-drinking-water"],
 		relievers: ["drinking-water"],
 	},
+	{
+		symptom: "urinary-retention",
+		description:
+			"Urinary Retention is when your bladder does not completely empty after urination.",
+		tags: ["urine", "retention", "remaining", "bladder", "empty"],
+		location: [],
+		duration: ["less-than-two-weeks", "more-than-two-weeks"],
+		onset: ["sudden", "gradual"],
+		nature: [],
+		periodicity: ["non-specific", "morning", "night", "intermittent"],
+		aggravators: ["drinking-water"],
+		relievers: ["not-drinking-water"],
+	},
+	{
+		symptom: "urgent-urination",
+		description:
+			"Urination urgency is a strong and sudden need to urinate.",
+		tags: ["urine", "urgent", "sudden" "urgency"],
+		location: [],
+		duration: ["less-than-two-weeks", "more-than-two-weeks"],
+		onset: ["sudden", "gradual"],
+		nature: [],
+		periodicity: ["non-specific", "morning", "night", "intermittent"],
+		aggravators: ["drinking-water"],
+		relievers: ["not-drinking-water"],
+	},
 ];
 
 type SymptomItem = {
