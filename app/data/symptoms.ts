@@ -2024,6 +2024,43 @@ const symptomsList = [
 		aggravators: ["bending", "lifting", "standing", "walking"],
 		relievers: ["pain-relievers"],
 	},
+	{
+		symptom: "urinary-intermitency",
+		description: "A urinary stream that is not consitent",
+		tags: ["urine", "intermitent"],
+		location: [],
+		duration: ["less-than-two-weeks", "more-than-two-weeks"],
+		onset: ["sudden", "gradual"],
+		nature: [],
+		periodicity: ["non-specific", "morning", "night", "intermittent"],
+		aggravators: ["not-drinking-water"],
+		relievers: ["drinking-water"],
+	},
+	{
+		symptom: "post-micturation-dribble",
+		description: "An involuntary loss of urine after urination.",
+		tags: ["urine", "intermitent", "dribble", "after"],
+		location: [],
+		duration: ["less-than-two-weeks", "more-than-two-weeks"],
+		onset: ["sudden", "gradual"],
+		nature: [],
+		periodicity: ["non-specific", "morning", "night", "intermittent"],
+		aggravators: ["not-drinking-water"],
+		relievers: ["drinking-water"],
+	},
+	{
+		symptom: "urinary-hesitancy",
+		description:
+			"Urinary hesitancy is a condition in which you have difficulty urinating.",
+		tags: ["urine", "hesitancy"],
+		location: [],
+		duration: ["less-than-two-weeks", "more-than-two-weeks"],
+		onset: ["sudden", "gradual"],
+		nature: [],
+		periodicity: ["non-specific", "morning", "night", "intermittent"],
+		aggravators: ["not-drinking-water"],
+		relievers: ["drinking-water"],
+	},
 ];
 
 type SymptomItem = {

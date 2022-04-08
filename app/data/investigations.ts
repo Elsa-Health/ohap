@@ -126,6 +126,7 @@ export const investigations: Array<investigation> = [
 	{ name: "Urinalysis - Sugar", type: "range" },
 	{ name: "Urinalysis - Ketones", type: "range" },
 	{ name: "Urinalysis - Bilirubin", type: "range" },
+	{ name: "Urinalysis - Leukocytes", type: "range" },
 	{ name: "Urinalysis - Blood", type: "boolean" },
 	{ name: "Urine Culture", type: "boolean" },
 ];
