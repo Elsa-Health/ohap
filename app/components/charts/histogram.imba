@@ -14,7 +14,6 @@ export tag Histogram
 		}
 
 		# Plotly.newPlot("histogramRoot", [trace])
-		console.log "awaken"
 
 	<self>
 		<div#histogramRoot>

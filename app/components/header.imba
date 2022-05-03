@@ -1,7 +1,10 @@
 # @ts-expect-error
 import {app} from "../realm.ts"
 
-
+# TODO: Match the design of the header
+# 1. Add navigation options
+# 2. Support mobile collapsible header
+# 3. Add logo icon to top left
 export tag Header < header
 	css bdb:1px solid #dcdcdc mb:3
 
@@ -23,12 +26,13 @@ export tag Header < header
 	<self>
 		<.container[d:flex jc:space-between ai:center]>
 			<h1[fs:24 fw:400]> 
-				<span[cursor:pointer] route-to="/"> "Elsa Model Platform"
+				<span[cursor:pointer c:$blue] route-to="/"> "Open Health Platform"
 
 			<div[d:flex]>
 				if (app && app.currentUser && app.currentUser.isLoggedIn && app.currentUser.providerType !== "anon-user")
 					# <p> "Authenticated"
-					<p[cursor:pointer c@hover:blue4 td@hover:underline] @click=signOut> getUserName! + "Sign Out"
+					<p[cursor:pointer c@hover:blue4 td@hover:underline ml:2] route-to="/profile/{app.currentUser.id}"> getUserName!
+					<p[cursor:pointer c@hover:blue4 td@hover:underline ml:2] @click=signOut> "Sign Out"
 				else
 					<a href="/sign-in">
 						"Sign In (Preview)"

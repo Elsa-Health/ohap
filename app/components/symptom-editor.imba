@@ -117,7 +117,6 @@ export tag SymptomEditor
 
 	def createPeriodicity name
 		# data.periodicity.ns.some(&) 
-		# console.log data.periodicity.ns
 		let emptyExists = data.periodicity.ns.some((do(value)
 			value.length === 0
 		))
@@ -193,7 +192,6 @@ export tag SymptomEditor
 		data[field][key].beta = 100 - value
 
 	def mount
-		console.log("Tick")
 		const { location, scale } = data.timeToOnset
 		tmpTTO.start = location - scale;
 		tmpTTO.end = location + scale

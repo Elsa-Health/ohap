@@ -42,17 +42,17 @@ export tag AssessmentInteract
 			symptomsOrder.push symptom.symptom
 			symptomSearchStr = ""
 
-	def setField symptomName, fieldName, value
-		patient.symptoms = patient.symptoms.map((do(sy) sy.name == symptomName ? ({ ...sy, [fieldName]: value }) : sy))
+	# def setField symptomName, fieldName, value
+	# 	patient.symptoms = patient.symptoms.map((do(sy) sy.name == symptomName ? ({ ...sy, [fieldName]: value }) : sy))
 
-	def chooseOption symptomName, fieldName, value
-		# console.log symptomName, fieldName, value, patient
-		patient.symptoms = patient.symptoms.map((do(sy) sy.name == symptomName ? ({ ...sy, [fieldName]: toggleStringList(sy[fieldName])(value)}) : sy))
+	# def chooseOption symptomName, fieldName, value
+	# 	patient.symptoms = patient.symptoms.map((do(sy) sy.name == symptomName ? ({ ...sy, [fieldName]: toggleStringList(sy[fieldName])(value)}) : sy))
 
 
 	def removeSymptom syName
 		activeEditSymptom = ""
 		# remove the symptom from the patient
+		console.log syName, patient
 		patient.symptoms = patient.symptoms.filter((do(sy) sy.name != syName))
 
 		# remove the symptom from the symptomsOrder
@@ -73,6 +73,8 @@ export tag AssessmentInteract
 
 		const activePatientSymptom = ast ? patient.symptoms.find((do(sy) sy.name === ast.symptom)) : null
 		const aps = activePatientSymptom
+
+		const activeSymptomIdx = patient.symptoms.findIndex((do(sy) sy.name === activeEditSymptom))
 
 		pt = createPatient(sex, age, patient.symptoms, patient.signs)
 
@@ -112,57 +114,87 @@ export tag AssessmentInteract
 
 
 							<div[fl:3 bdl:1px solid cool4 p:3 pb:10]>
-								if ast
-									<div[d:flex jc:space-between]>
-										<.text-xl> 
-											friendlySymptomName(activeEditSymptom)
-										<span[cursor:pointer] @click=(removeSymptom(activeEditSymptom))> "Close"
-
-									<div>
-										<p[mb:1]> "Duration"
-										<input[p:2 w:100%] placeholder="Days ..." value=aps.duration @change=(setField activeEditSymptom, "duration", e.target.value) min=0 type="number">
-
-									<div[mt:4]>
-										<p[mb:1]> "Locations"
-										<div.options-wrapper>
-											for loc in ast.location
-												<button .active-option=(aps.locations.includes(loc)) @click=(chooseOption activeEditSymptom, "locations", loc) type="button"> friendlySymptomName loc
-
-									<div[mt:4]>
-										<p[mb:1]> "Onset"
-										<div.options-wrapper>
-											for ons in ast.onset
-												<button @click=(setField activeEditSymptom, "onset", ons) .active-option=(aps.onset == ons) type="button"> friendlySymptomName ons
-
-
-									<div[mt:4]>
-										<p[mb:1]> "Periodicity"
-										<div.options-wrapper>
-											for per in ast.periodicity
-												<button @click=(setField activeEditSymptom, "periodicity", per) .active-option=(aps.periodicity == per) type="button"> friendlySymptomName per
-
-									<div[mt:4]>
-										<p[mb:1]> "Nature"
-										<div.options-wrapper>
-											for nat in ast.nature
-												<button .active-option=(aps.nature.includes(nat)) @click=(chooseOption activeEditSymptom, "nature", nat) type="button"> friendlySymptomName nat
-
-									<div[mt:4]>
-										<p[mb:1]> "Aggravators"
-										<div.options-wrapper>
-											for agg in ast.aggravators
-												<button .active-option=(aps.aggravators.includes(agg)) @click=(chooseOption activeEditSymptom, "aggravators", agg) type="button"> friendlySymptomName agg
-
-									<div[mt:4]>
-										<p[mb:1]> "Relievers"
-										<div.options-wrapper>
-											for rel in ast.relievers
-												<button .active-option=(aps.relievers.includes(rel)) @click=(chooseOption activeEditSymptom, "relievers", rel) type="button"> friendlySymptomName rel
-
+								<SymptomInputForm symptom=activeSymptomTemplate remove=removeSymptom bind=patient.symptoms[activeSymptomIdx] >
 				<div>
 					<assessment-likelihoods-visual
 						diseaseModels=diseaseModels 
 						patient=pt>
+
+
+
+export tag SymptomInputForm
+
+	css .options-wrapper > button mr:2 py:1 px:6 fs:sm bgc:white bd:1px solid cool4 rd:2 cursor:pointer bgc@hover:$blue c@hover:white mb:1
+	css .options-wrapper > button.active-option bgc:$blue c:white
+
+
+	prop symptom\SymptomItem
+	prop remove
+	prop data
+
+
+	def setField symptomName, fieldName, value
+		# console.log symptomName, fieldName, value, data["field"]
+		data[fieldName] = value
+		# data.symptoms = data.symptoms.map((do(sy) sy.name == symptomName ? ({ ...sy, [fieldName]: value }) : sy))
+
+	def chooseOption symptomName, fieldName, value
+		data[fieldName] = toggleStringList(data[fieldName])(value)
+		# data.symptoms = data.symptoms.map((do(sy) sy.name == symptomName ? ({ ...sy, [fieldName]: toggleStringList(sy[fieldName])(value)}) : sy))
+
+	<self>
+		if symptom
+			<div[d:flex jc:space-between]>
+				<.text-xl> 
+					friendlySymptomName(symptom.symptom)
+				<span[cursor:pointer] @click=(remove(symptom.symptom))> "Close"
+
+			<div>
+				<p[mb:1]> "Duration"
+				<input[p:2 w:100%] placeholder="Days ..." value=data.duration @change=(setField symptom.symptom, "duration", e.target.value) min=0 type="number">
+
+			if symptom.location && symptom.location.length > 0
+				<div[mt:4]>
+					<p[mb:1]> "Locations"
+					<div.options-wrapper>
+						for loc in symptom.location
+							<button .active-option=(data.locations.includes(loc)) @click=(chooseOption symptom.symptom, "locations", loc) type="button"> friendlySymptomName loc
+
+			if symptom.onset && symptom.onset.length > 0
+				<div[mt:4]>
+					<p[mb:1]> "Onset"
+					<div.options-wrapper>
+						for ons in symptom.onset
+							<button @click=(setField symptom.symptom, "onset", ons) .active-option=(data.onset == ons) type="button"> friendlySymptomName ons
+
+
+			if symptom.periodicity && symptom.periodicity.length > 0
+				<div[mt:4]>
+					<p[mb:1]> "Periodicity"
+					<div.options-wrapper>
+						for per in symptom.periodicity
+							<button @click=(setField symptom.symptom, "periodicity", per) .active-option=(data.periodicity == per) type="button"> friendlySymptomName per
+
+			if symptom.nature && symptom.nature.length > 0
+				<div[mt:4]>
+					<p[mb:1]> "Nature"
+					<div.options-wrapper>
+						for nat in symptom.nature
+							<button .active-option=(data.nature.includes(nat)) @click=(chooseOption symptom.symptom, "nature", nat) type="button"> friendlySymptomName nat
+
+			if symptom.aggravators && symptom.aggravators.length > 0
+				<div[mt:4]>
+					<p[mb:1]> "Aggravators"
+					<div.options-wrapper>
+						for agg in symptom.aggravators
+							<button .active-option=(data.aggravators.includes(agg)) @click=(chooseOption symptom.symptom, "aggravators", agg) type="button"> friendlySymptomName agg
+
+			if symptom.relievers && symptom.relievers.length > 0
+				<div[mt:4]>
+					<p[mb:1]> "Relievers"
+					<div.options-wrapper>
+						for rel in symptom.relievers
+							<button .active-option=(data.relievers.includes(rel)) @click=(chooseOption symptom.symptom, "relievers", rel) type="button"> friendlySymptomName rel
 
 
 
@@ -213,7 +245,6 @@ tag assessment-likelihoods-visual
 			return 0
 		try
 			formattedPatient = formatPatient(patient)
-			console.log diseaseModel.symptoms
 			const softerModel = {
 				...diseaseModel,
 				symptoms: softenSymptomBetas(diseaseModel.symptoms)

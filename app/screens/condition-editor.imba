@@ -1,5 +1,8 @@
 import { distributions } from '@elsa-health/model-runtime'
 import type { Symptom } from '@elsa-health/model-runtime/dist/public-types'
+import {last} from "lodash"
+import axios from "axios"
+import riskFactors from "../data/riskFactors"
 import { TryModel } from '../components/try-model'
 import { toggleStringList, rescaleList, friendlySymptomName, getSymptomTemplate, searchForSymptom, formatFriendlyModel, formatFriendlySymptom, softenSymptomBetas } from '../utils.ts'
 import '../components/symptoms-timeline'
@@ -8,10 +11,9 @@ import { SymptomEditor } from '../components/symptom-editor'
 import { NewSymptomWizardModal } from '../components/new-symptom-wizard-modal.imba'
 import { SliderInput } from '../components/slider-input.imba'
 import {AssessmentInteract} from "../components/assessment-interact.imba"
-import {last} from "lodash"
+import "../components/modal.imba"
 import Realm, {modelsDb, app} from "../realm.ts"
 import { commentsDb } from "../realm.ts"
-import axios from "axios"
 
 import {dummyModel} from "../data/dummyModel"
 
@@ -83,11 +85,6 @@ let comments = []
 let expandedComments = false
 
 export tag ConditionEditor
-
-	# def build
-	# 	conditionId = last(window.location.pathname.split("/"))
-	# 	console.log 'routed', conditionId
-	
 	def deleteModel
 		const confirmation = window.confirm("Are you sure you want to delete this model? This operation cannot be reversed.")
 		if !confirmation
@@ -116,7 +113,6 @@ export tag ConditionEditor
 			const result = await axios.post(URL, {
 				model
 			})
-			console.log result
 			return result.data
 		catch error
 			console.error({error})
@@ -235,7 +231,6 @@ export tag ConditionEditor
 		resetState!
 		state = {...state, ...res}
 		loadingConditionModel = false
-		console.log("STATE: ", state)
 
 		if res && res._id
 			const comms = await commentsDb.find({ referenceId: res._id })
@@ -252,17 +247,17 @@ export tag ConditionEditor
 			<div[d:{savingModel ? "block" : "none"}]>
 				"Please wait while saving the model"
 
-			if showRiskFactorsManager
+			<modal title="Risk Factors" onClose=(do() showRiskFactorsManager = false) open=showRiskFactorsManager>
 				<manage-risk-factors
-				submit=saveRiskFactors 
-				close=(do showRiskFactorsManager = false)
-				factors=state.riskFactors>
+					submit=saveRiskFactors 
+					close=(do showRiskFactorsManager = false)
+					factors=state.riskFactors>
 
-			if showInvestigationsManager
+			<modal title="Tests & Investigations" onClose=(do() showInvestigationsManager = false) open=showInvestigationsManager>
 				<condition-investigation-findings 
-				submit=saveInvestigations
-				close=(do showInvestigationsManager = false)
-				investigations=state.investigations>
+					submit=saveInvestigations
+					close=(do showInvestigationsManager = false)
+					investigations=state.investigations>
 
 			<div[d:{savingModel ? "none" : "block"}]>
 				if showSymptomWizard
@@ -283,7 +278,7 @@ export tag ConditionEditor
 						<[c:blue6 fs:small]> "Created By: " + state.ownerEmail
 				
 				if loadingConditionModel
-					<[fs:large]> "Loading the condition model ...."
+					<loading-progress-bar [w@md:100% w@lg:40% mx:auto my:20] ready=!loadingConditionModel>
 				else
 					if view === "add-symptom"
 						<button @click=(view = "view-summary")> "View Summary"
@@ -304,7 +299,7 @@ export tag ConditionEditor
 							<button.button @click=downloadModel> "Download"
 
 							if state.metadata and state.metadata.performance
-								<button.button type="button" route-to="/condition/{state.condition}/{state._id.toString()}/evaluations"> "View Evaluation Results"
+								<button type="button" route-to="/condition/{state.condition}/{state._id.toString()}/evaluations"> "View Evaluation Results"
 						<symptoms-timeline selectSymptom=selectSymptom symptoms=sortByEarliest(state.symptoms) stages=(state.stages)>
 					
 						<div[pt:4]>
@@ -366,7 +361,6 @@ tag ModelCommentDialogue
 			console.error({error})
 
 	def render
-		console.log title, isBug, isFeatureRequest, referenceId, model._id, comment
 		<self>
 			<div[bgc:white w@md:50vw m:auto mt@md:10vh p:4 rd:md shadow:lg min-height@md:30vh]>
 				<[fs:2xl]> "Leave a Comment" 
@@ -397,24 +391,8 @@ tag ModelCommentDialogue
 					<button> "Submit"
 
 
-
-
-let riskFactors = [
-	{ name: "smoking", tags: ["cigarretes"] }
-	{ name: "alcohol-consumption", tags: ["drinking", "alcohol", "drunk"] }
-	{name: "immunocompromised", tags: ["hiv", "immunity"] }
-	{name: "men-who-have-sex-with-men", tags: ["homosexual"] }
-	{name: "diabetic", tags: ["diabetes", "sugar"]}
-	{name: "hypertensive", tags: ["hypertension", "blood", "pressure"]}
-	{name: "infected-person-contact", tags: ["exposure"]}
-	{name: "high-colesterol", tags: ["colesterol", "obesity"] }
-	{name: "unhygenic-living-conditions", tags: ["environment"]}
-	{name: "obesity", tags: ["overweight", "weight", "cholesterol"]}
-	{name: "family-history", tags: ["genetic", "family", "inherit"]}
-	{name: "substance-abuse", tags: ["drugs"]}
-	{name: "organ-transplant", tags: ["transplant", "surgery"]}
-	{name: "sedentary-lifestyle", tags: ["sitting"]}
-]
+const riskFactorOptions = riskFactors.map do(factor)
+	distributions.createBeta factor.name, 50, 50
 
 tag manage-risk-factors
 	prop submit
@@ -446,7 +424,6 @@ tag manage-risk-factors
 
 
 	def updateFactor name, value
-		console.log name, value
 		factors = factors.map do(f)
 			if f.name === name
 				f.alpha = value
@@ -465,27 +442,24 @@ tag manage-risk-factors
 
 
 	def render
-		console.log factors
-		<self.modal.is-active>
-			<div.modal-background>
-			<div.modal-content.has-background-white.p-4[rd:md]>
-				<h1.subtitle.is-3> "Risk Factors"
-
+		<self>
+			<div[rd:md]>
 				<label>
-					"Search"
-					<input.input bind=searchStr type="text" placeholder="obese, immunocompromised, ...">
+					# <input.input bind=searchStr type="text" placeholder="obese, immunocompromised, ...">
+					# <text-input label="Search" bind=searchStr placeholder="obese, immunocompromised, ...">
+					<multi-select-input label="Search" bind=factors options=riskFactorOptions labelKey="name" valueKey="name">
 
-				<div.tags.pt-2>
-					for res in searchFilter(searchStr, riskFactors)
-						<span.tag.is-medium[cursor:pointer] .is-primary=activeFactor(res.name) @click=(toggleFactor res.name)> friendlySymptomName res.name
+				# <div>
+				# 	for res in searchFilter(searchStr, riskFactors)
+				# 		<span.tag.is-medium[cursor:pointer] .is-primary=activeFactor(res.name) @click=(toggleFactor res.name)> friendlySymptomName res.name
 
 
 
-				<div.p-1>
+				<div[p:1]>
 					for pFactor in factors
-						<div.pb-3.is-flex.is-align-items-center.is-justify-content-space-between[fld:row]>
+						<div[d:flex py:4 ai:center jc:space-between fld:row bdb:1px #ccc/20 solid]>
 							<SliderInput 
-								label=(friendlySymptomName pFactor.name )
+								label=(friendlySymptomName pFactor.name)
 								value=pFactor.alpha
 								width=300
 								min=0.001
@@ -499,7 +473,8 @@ tag manage-risk-factors
 
 							<span[cursor:pointer c@hover:red] @click=(do removeFactor(pFactor.name))> "Remove"
 
-				<div.is-flex.is-justify-content-flex-end>
-					<button.button.mr-3 @click=close> "Cancel"
-					<button.button.is-primary @click=saveFactors> "Save"
+				<div[d:flex pt:8]>
+					<ui-button @click=close> "Cancel"
+					<div[w:5]>
+					<ui-button variant="filled" @click=saveFactors> "Save"
 

@@ -53,7 +53,6 @@ export tag TryModel
 		try
 			formattedPatient = formatPatient(patient)
 			const softerModel = {...diseaseModel, symptoms: softenSymptomBetas(diseaseModel.symptoms)}
-			# console.log(interpret(false)(softerModel)(formattedPatient))
 			return interpret(false)(softerModel)(formattedPatient)
 		catch err
 			console.error({err})
@@ -71,9 +70,6 @@ export tag TryModel
 		let activeSymptom = patient.symptoms.find((do(sy) sy.name === selectedSymptomName))
 		const activeSymptomTemplate = activeSymptom && getSymptom(activeSymptom.name);
 		const modelResult = runAssessment() || 0
-
-		console.log({activeSymptomTemplate})
-		
 
 		<self>
 			<[fs:xx-large]>

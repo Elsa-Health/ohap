@@ -19,7 +19,7 @@ export tag RunAssessments
 			)
 			modelsList = models
 		catch error
-			console.log({error})
+			console.error({error})
 		finally
 			loadingModels = false
 		

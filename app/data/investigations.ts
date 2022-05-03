@@ -9,26 +9,34 @@ export type investigation2 = {
 	};
 };
 
-type investigation = {
-	name: string;
-	withDescription?: boolean;
-	type: "boolean" | "number" | "range" | "normality";
-};
+type investigation =
+	| {
+			name: string;
+			withDescription?: boolean;
+			type: "boolean" | "range" | "normality";
+			units?: string;
+	  }
+	| {
+			name: string;
+			withDescription?: boolean;
+			type: "number";
+			units: string;
+	  };
 
 export const investigations: Array<investigation> = [
 	{ name: "Rapid Test (MRDT)", type: "boolean" },
 	{ name: "Blood Slide", type: "boolean" },
-	{ name: "CD4 Count", type: "number" },
-	{ name: "Viral load", type: "number" },
+	{ name: "CD4 Count", type: "number", units: "cells/mm3" },
+	{ name: "Viral load", type: "number", units: "cells/mm3" },
 	{ name: "HIV Rapid Test", type: "boolean" },
 	{ name: "CrAg", type: "boolean" },
 	{ name: "Hepatitis B surface antigen (HBsAg)", type: "boolean" },
 	{ name: "Hepatitis B e-Antigen (HbeAg)", type: "boolean" },
 
 	// Imaging
-	{ name: "X-Ray", type: "normality" },
-	{ name: "MRI", type: "normality" },
-	{ name: "CT Scan", type: "normality" },
+	{ name: "X-Ray", type: "normality", withDescription: true },
+	{ name: "MRI", type: "normality", withDescription: true },
+	{ name: "CT Scan", type: "normality", withDescription: true },
 
 	// TB
 	{ name: "Xpert MTB/ RIF", type: "boolean" },
@@ -75,51 +83,62 @@ export const investigations: Array<investigation> = [
 	{ name: "Creatinine", type: "range" },
 
 	// Hematology / Blood Tests
-	{ name: "Haemoglobin (HB)", type: "range" },
-	{ name: "White Cell Count (WBC)", type: "range" },
-	{ name: "Platelet Count (PLT)", type: "range" },
-	{ name: "Red Blood Count (RBC)", type: "range" },
-	{ name: "Mean Cell Volume (MCV)", type: "range" },
-	{ name: "Packed Cell Volume (PCV)/Haematocrit (HCT)", type: "range" },
-	{ name: "Mean Cell Haemoglobin (MCH)", type: "range" },
-	{ name: "Mean Cell Haemoglobin Concentration (MCHC)", type: "range" },
-	{ name: "Neutrophil Count", type: "range" },
-	{ name: "Lymphocyte Count", type: "range" },
-	{ name: "Monocyte Count", type: "range" },
-	{ name: "Eosinophil Count", type: "range" },
-	{ name: "Basophil Count", type: "range" },
-	{ name: "Erythrocyte Sedimentation Rate (ESR)", type: "range" },
-	{ name: "Reticulocytes", type: "range" },
-	{ name: "PT", type: "range" },
+	{ name: "Haemoglobin (HB)", type: "range", units: "g/L" },
+	{ name: "White Cell Count (WBC)", type: "range", units: "x10^9/L" },
+	{ name: "Platelet Count (PLT)", type: "range", units: "x10^9/L" },
+	{ name: "Red Blood Count (RBC)", type: "range", units: "x10^12/L" },
+	{ name: "Mean Cell Volume (MCV)", type: "range", units: "fl" },
+	{
+		name: "Packed Cell Volume (PCV)/Haematocrit (HCT)",
+		type: "range",
+		units: "L/L",
+	},
+	{ name: "Mean Cell Haemoglobin (MCH)", type: "range", units: "fmol/cell" },
+	{
+		name: "Mean Cell Haemoglobin Concentration (MCHC)",
+		type: "range",
+		units: "g/L",
+	},
+	{ name: "Neutrophil Count", type: "range", units: "x10^9/L" },
+	{ name: "Lymphocyte Count", type: "range", units: "x10^9/L" },
+	{ name: "Monocyte Count", type: "range", units: "x10^9/L" },
+	{ name: "Eosinophil Count", type: "range", units: "x10^9/L" },
+	{ name: "Basophil Count", type: "range", units: "x10^9/L" },
+	{
+		name: "Erythrocyte Sedimentation Rate (ESR)",
+		type: "range",
+		units: "mm/hr",
+	},
+	{ name: "Reticulocytes", type: "range", units: "%" },
+	{ name: "PT", type: "range", units: "Secs" },
 	{ name: "INR", type: "range" },
 	{ name: "APTT", type: "range" },
 	{ name: "Fibrinogen", type: "range" },
 	{ name: "Antithrombin Activity", type: "range" },
 	{ name: "Protein S Free Antigen", type: "range" },
 	{ name: "Protein C Activity", type: "range" },
-	{ name: "Lupus Anticoagulant", type: "range" },
 	{ name: "Activated Protein C Resistance (APCR)", type: "range" },
 	{ name: "Lupus Anticoagulant", type: "range" },
 	{ name: "FDPs", type: "range" },
 	{ name: "Factor VIII", type: "range" },
 	{ name: "Factor IX", type: "range" },
-	{ name: "C-Reactive protein, blood", type: "range" },
-	{ name: "Iron, serum", type: "range" },
+	{ name: "C-Reactive protein, blood", type: "range", units: "mg/dL" },
 	{ name: "Glucose, plasma—fasting", type: "range" },
-	{ name: "Iron, serum", type: "range" },
+	{ name: "Iron, serum", type: "range", units: "mcg/dL" },
 
 	// other
 	{ name: "HPV Test", type: "boolean" },
 	{ name: "Chlamydia Rapid Test", type: "boolean" },
-	{ name: "H-Pylori Stool Test", type: "normality" },
-	{ name: "Blood Pressure", type: "range" },
+	{ name: "H-Pylori Stool Test", type: "normality", withDescription: true },
+	{ name: "Systolic Blood Pressure", type: "range", units: "mmHG" },
+	{ name: "Diastolic Blood Pressure", type: "range", units: "mmHG" },
 	{ name: "Lactate dehydrogenase (LDH) test", type: "range" },
 	{ name: "Pregnancy Test", type: "boolean" },
-	{ name: "Oxygen Saturation", type: "normality" },
-	{ name: "High Vaginal Swab (HVS)", type: "normality" },
+	{ name: "Oxygen Saturation", type: "normality", withDescription: true },
+	{ name: "High Vaginal Swab (HVS)", type: "normality", withDescription: true },
 
 	//
-	{ name: "Stool Analysis", type: "normality" },
+	{ name: "Stool Analysis", type: "normality", withDescription: true },
 	{ name: "Urinalysis - Acidity", type: "range" },
 	{ name: "Urinalysis - Concentration", type: "range" },
 	{ name: "Urinalysis - Protein", type: "range" },
@@ -130,6 +149,10 @@ export const investigations: Array<investigation> = [
 	{ name: "Urinalysis - Blood", type: "boolean" },
 	{ name: "Urine Culture", type: "boolean" },
 ];
+
+// FIXME: There is a duplicate of creatinine
+// FIXME: The investigations need to be updated to support panel/battery tests
+// FIXME: Blood pressure needs systolic and diastolic
 
 export const normalityRangeItems = ["high", "normal", "low"];
 

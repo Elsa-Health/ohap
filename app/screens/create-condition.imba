@@ -36,7 +36,6 @@ export tag CreateCondition
 
 			window.alert(`Successfully created and saved the ${condition.name} model`);
 
-			console.log(result)
 			condition = { name: "" };
 			# TODO: Go to the model definition/editor page??
 		catch err

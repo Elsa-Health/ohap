@@ -16,15 +16,15 @@ let dE = [ {
 let vignetteEvaluations = []
 let diseaseName = ""
 
+let loading = true
+
 export tag ModelEvaluations
 	def mount
 		const pathnameItems = window.location.pathname.split("/")
 		const conditionId = pathnameItems[pathnameItems.length - 2]
 		diseaseName = pathnameItems[pathnameItems.length - 3]
-		console.log conditionId
 		try
 			const res = await modelsDb.findOne({_id: new Realm.BSON.ObjectID(conditionId)})
-			console.log("STATE: ", res)
 			state = res
 			loadingConditionModel = false
 
@@ -34,25 +34,28 @@ export tag ModelEvaluations
 				const result = await axios.post(URL, {
 					ids: res.metadata.performance.evaluations.map do(e) e.vignetteId
 				})
-				console.log result
 				const vignetteItems = result.data.map do(vign)
 					const v = res.metadata.performance.evaluations.find do(e) e.vignetteId == vign.uid
 					v.vignette = vign
 					return v
 
 				vignetteEvaluations = vignetteItems
+				loading = false
+				tick!
 				return result.data
 		catch error
 			console.error({ error })
 
 	
 	def render
-		console.log vignetteEvaluations
 		<self>
 			<.text-2xl> "Evaluation Results: {diseaseName}"
 
-			for item in sortBy(vignetteEvaluations, ["p"]).reverse()
-				<VignetteEvaluationItem vEvaluation=item />
+				<loading-progress-bar [w@md:100% w@lg:40% mx:auto my:20] ready=!loading>
+
+			if !loading
+				for item in sortBy(vignetteEvaluations, ["p"]).reverse()
+					<VignetteEvaluationItem vEvaluation=item />
 
 
 

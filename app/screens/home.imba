@@ -32,7 +32,7 @@ tag Hero
 		<div[d:flex jc:center mt:14 ai:center]>
 			<div[bd:#ccc 1px solid d:flex ai:center rd:full pr:4 cursor:pointer]>
 				<div[bg:$blue c:white py:2 px:4 rd:full fs:sm mr:2]>
-					"Unstable (v 0.0.12)"
+					"Unstable (v 0.0.24)"
 				<div[fs:xs]>
 					"Things are changing often, so expect many suprises until v 0.1."
 

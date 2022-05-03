@@ -86,25 +86,25 @@ tag condition-investigation-findings
 
 
 	def render
-		<self.modal.is-active>
-			<div.modal-background>
-			<div.modal-content.has-background-white.p-4[rd:md]>
-				<h1.subtitle.is-3> "Investigation Findings"
+		<self>
+			<div[rd:md]>
+				# <h1.subtitle.is-3> "Investigation Findings"
 
 
-				<label>
-					"Search"
-					<input.input 
-					bind=searchStr 
-					type="text" 
-					placeholder="Search Investigations, mrdt, cd4, ...">
+				<multi-select-input label="Search" bind=investigations options=investigationList labelKey="name" valueKey="name">
+				# <label>
+					# "Search"
+					# <input.input 
+					# 	bind=searchStr 
+					# 	type="text" 
+					# 	placeholder="Search Investigations, mrdt, cd4, ...">
 
-					<div.tags.pt-2>
-						for inv in searchFilter(searchStr, investigationList)
-							<span.tag.is-medium[cursor:pointer]
-								.is-primary=activeInv(inv.name)
-								@click=(toggleInv inv.name)> 
-									friendlySymptomName inv.name
+					# <div.tags.pt-2>
+					# 	for inv in searchFilter(searchStr, investigationList)
+					# 		<span.tag.is-medium[cursor:pointer]
+					# 			.is-primary=activeInv(inv.name)
+					# 			@click=(toggleInv inv.name)> 
+					# 				friendlySymptomName inv.name
 
 
 				for inv in investigations
@@ -148,9 +148,10 @@ tag condition-investigation-findings
 											>
 
 
-				<div.is-flex.is-justify-content-flex-end>
-					<button.button.mr-3 @click=close> "Cancel"
-					<button.button.is-primary @click=saveInvs > "Save"
+				<div[d:flex pt:8]>
+					<ui-button @click=close> "Cancel"
+					<div[w:5]>
+					<ui-button variant="filled" @click=saveInvs> "Save"
 
 
 
@@ -181,5 +182,5 @@ tag collapsible
 				<span[cursor:pointer c@hover:red] @click=remove > "Remove"
 
 		if open
-			<div[mt:-3 pl:10]>
+			<div[mt:-4 pl:10]>
 				<slot>

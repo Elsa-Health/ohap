@@ -119,7 +119,10 @@ export const searchForSymptom =
 	};
 
 export const friendlySymptomName = (name: string) => {
-	return camelToText(_.upperFirst(name.split("-").join(" ")));
+	return camelToText(_.upperFirst(name.split("-").join(" "))).replace(
+		/  +/g,
+		" "
+	);
 };
 
 export const toggleCondition = (

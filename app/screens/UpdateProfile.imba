@@ -16,7 +16,6 @@ export tag UpdateProfile
 
 		# consoleapp.currentUser.customData
 		app.currentUser.refreshCustomData()
-		# console.log app.currentUser.customData
 		const cd = app.currentUser.customData
 		
 		username = cd.username || ""
@@ -51,7 +50,6 @@ export tag UpdateProfile
 			// Refresh the user's local customData property
 			await app.currentUser.refreshCustomData();
 
-			console.log(app.currentUser)
 			window.location.replace("/")
 		catch error
 			window.alert("Failed to sign up!")

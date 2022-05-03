@@ -54,7 +54,6 @@ export tag CreateConditionModel
 		try 
 			const result = await modelsDb.insertOne(cond)
 			window.alert "Condition Model created!"
-			console.log("{result.insertedId}")
 
 			window.document.location.href = "{document.location.origin}/condition/{conditionName}/{result.insertedId}"
 		catch error
@@ -67,10 +66,10 @@ export tag CreateConditionModel
 	def mount
 		try 
 			const conditionItems = await conditionsDb.find({})
-			console.log conditionItems
 			conditions = conditionItems
 			loadingConditions = false
-		catch
+		catch error
+			console.error({error})
 			loadingConditions = false
 			conditions = []
 

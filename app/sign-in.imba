@@ -13,7 +13,6 @@ let password = ""
 
 export tag SignIn
 	def signUp
-		console.log "clicked", password, username, email, profession, country, password
 		loading = true
 
 		const confirmation = window.confirm "Please confirm your email, password and other details"
@@ -31,7 +30,6 @@ export tag SignIn
 			# 	console.log(app.currentUser.linkCredentials)
 			# 	auth = await app.currentUser.linkCredentials(emailPasswordUserCredentials);
 			
-			console.log(auth, app.currentUser)
 			# window.location.replace("/update-proile")
 		catch error
 			window.alert("Failed to sign up!")
