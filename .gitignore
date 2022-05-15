@@ -6,6 +6,7 @@ realm.ts
 notes.txt
 .env
 .vscode
+.nyc*
 
 .vercel
 playwright-report

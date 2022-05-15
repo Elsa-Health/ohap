@@ -15,7 +15,8 @@
 			{
 				"regenerator": true
 			},
-			"@babel/preset-env"
+			"@babel/preset-env",
+			"istanbul"
 		]
 	]
 }
