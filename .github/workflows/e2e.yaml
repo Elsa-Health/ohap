@@ -35,7 +35,7 @@ jobs:
           PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: 1
       - run: npm run build
       - run: npx playwright install --with-deps ${{ matrix.browser }} chromium
-      - run: xvfb-run --auto-servernum --server-args="-screen 0 1280x960x24" -- npm run test -- --project=${{ matrix.browser }}
+      # - run: xvfb-run --auto-servernum --server-args="-screen 0 1280x960x24" -- npm run test -- --project=${{ matrix.browser }}
       - name: Run e2e tests
         run: npm run test:e2e
       - name: Upload test results
