@@ -2,7 +2,7 @@
 node_modules
 dist
 
-realm.ts
+realms.ts
 notes.txt
 .env
 .vscode
