@@ -1,15 +1,9 @@
+import axios from 'axios'
 import { ConditionListItem } from './condition-models'
 import { friendlySymptomName } from '../utils.ts'
 import { SimpleInput } from '../components/simple-input'
-import { conditionsDb, modelsDb } from '../realm.ts'
+import { app, ensureLoggedIn, conditionsDb, modelsDb } from '../realm.ts'
 import { format, formatDistance, formatRelative, subDays } from 'date-fns'
-
-let models = [
-	{ _id: "deuwiodxqas", symptoms: [], signs: [], condition: "pneumonia", nickname: "pneumonia-tanzania-children" },
-	{ _id: "deuwi34xqas", symptoms: [], signs: [], condition: "tinea-nigra", nickname: "Tinea Nigra" },
-	{ _id: "deuwirfsqas", symptoms: [], signs: [], condition: "brochitis", nickname: "brochitis - ally" },
-	{ _id: "de65iodxqas", symptoms: [], signs: [], condition: "vaginal-candidiasis", nickname: "blue - vaginal candidiasis" },
-]
 
 let metadata = { performance: { sensitivity: 0.5, specificity: 0.2, f1: 0.99, kl: null }, activity: { downloads: 30, likes: 1 } }
 
@@ -45,8 +39,13 @@ export tag ExploreModels
 			const results = [] # await conditionsDb.find({}, {limit: 100})
 			conditionsList = results
 
-			const models = await modelsDb.find({}, {limit: 250, sort: { updatedAt: -1 } })
-			modelsList = models
+			# const res = await ensureLoggedIn(app)
+			# console.log "RESULT: ", res
+			# const models = await modelsDb.find({}, {limit: 250, sort: { updatedAt: -1 } })
+			# TODO: Reduce number of models to pull down and fix search functionality to search in database
+			const models = await axios.get("https://eu-central-1.aws.data.mongodb-api.com/app/elsa-models-lqpbx/endpoint/recentModels?count=100")
+			# console.log models.data
+			modelsList = models.data
 		catch error
 			console.log({error})
 		
@@ -63,8 +62,8 @@ export tag ExploreModels
 				if loadingConditions
 					<[fs:large]> "Loading ..."
 				for condition in conditionsList.filter((do(x) x.name.toLowerCase().includes(conditionSearchString.toLowerCase()))).slice(0, 50)
-					<ConditionItemCard data=friendlySymptomName(condition.name) route-to=`/condition/${condition.name}$`>
-					# <div[shadow:md bg:blue1 px:4 py:4 rd:lg shadow@hover:lg cursor:pointer] route-to=`/condition/${condition.name}$`>
+					<ConditionItemCard data=friendlySymptomName(condition.name) route-to=`/condition/{condition.name}`>
+					# <div[shadow:md bg:blue1 px:4 py:4 rd:lg shadow@hover:lg cursor:pointer] route-to=`/condition/{condition.name}$`>
 						
 
 			<a href="/create-condition"> "+ Create new Condition / Disease"
@@ -78,7 +77,7 @@ export tag ExploreModels
 
 			<div[d:grid gcg:2em grg:2em gtc@lt-sm:1fr gtc:1fr 1fr pt:3]>
 				for model in modelsList.filter(do(mod) filterBySearchStr mod, conditionSearchString)
-					<div route-to="/condition/{model.condition}/{model._id}" >
+					<div.model-item route-to="/condition/{model.condition}/{model._id}" >
 						<ModelItemCard model=model onOpenModel=(console.log)>
 
 

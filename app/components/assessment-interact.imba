@@ -1,4 +1,4 @@
-import { rescaleList, getSymptomTemplate, searchForSymptom, friendlySymptomName, toggleStringList } from '../utils.ts'
+import { searchForSymptom, friendlySymptomName, toggleStringList } from '../utils.ts'
 import symptomsList, { getSymptomByName } from '../data/symptoms'
 import { createPatient, interpret,formatPatient } from '@elsa-health/model-runtime'
 import {SimpleSearchBox} from "./simple-search-box.imba"

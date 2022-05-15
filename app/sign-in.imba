@@ -16,6 +16,7 @@ export tag SignIn
 		loading = true
 
 		const confirmation = window.confirm "Please confirm your email, password and other details"
+		console.log email, password
 
 		if (!confirmation)
 			loading = false
@@ -31,6 +32,8 @@ export tag SignIn
 			# 	auth = await app.currentUser.linkCredentials(emailPasswordUserCredentials);
 			
 			# window.location.replace("/update-proile")
+			console.log auth
+			window.alert "Thank you for registering. Please check your email for a confirmation."
 		catch error
 			window.alert("Failed to sign up!")
 			console.log error
@@ -65,5 +68,5 @@ export tag SignIn
 				<button[p:2 w:100% mt:6] disabled=loading> 
 					loading ? "Loading ...":"Sign In"
 
-				<button[p:2 w:100% mt:6] type="button" @click=signUp disabled=true> 
+				<button[p:2 w:100% mt:6] type="button" @click=signUp disabled=loading> 
 					loading ? "Loading ...":"Create Account"

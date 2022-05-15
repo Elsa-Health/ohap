@@ -11,12 +11,14 @@ import Fuse from 'fuse.js'
 tag select-input
 	prop options\{label: string; value: string}[]
 	prop label
+	prop labelKey\string = "label"
 	prop value\string
 	prop onChange
 	prop required = false
+	prop searchable\boolean = true
 	prop data = ""
 
-	focused = false
+	selectInputFocused = false
 	# searchStr = value || ""
 
 	css pos:relative
@@ -30,27 +32,38 @@ tag select-input
 		onChange(item.value) if onChange
 
 	def search list, searchStr
+		if searchStr.length === 0 || searchable === false
+			return list
+		
 		const options = {
 			includeScore: false,
 			shouldSort: true,
-			keys: ['label', 'value', 'description'],
+			keys: [labelKey, 'value', 'description'],
 		}
 
 		const fuse = new Fuse(list, options)
 		fuse.search(searchStr).map do(itm) itm.item
 
+	def handleKeyDown evt
+		selectInputFocused = true
+		evt.preventDefault! if !searchable
+
+	def mount
+		selectInputFocused = false
+
 	def render
+		selectInputFocused
 		<self>
 			<.wrapper>
 				<label[c:cool8]> 
 					"{label}"
 					<span[c:red5]> " *" if required
-				<input.simple-input bind=data @focusin=(focused = true) @keydown=(focused = true) @focusout.wait(200)=(focused = false)>
+				<input.simple-input type="text" bind=data @focusin=(selectInputFocused = true) @keydown=handleKeyDown @focusout.wait(200)=(selectInputFocused = false)>
 
-			<.options-wrapper[d:{!focused ? "none" : "block"}]>
+			<.options-wrapper[d:{selectInputFocused ? "block" : "none"}]>
 				for item in search(options, data)
 					<div.option-item @click=(selectItem item)>
-						item.label
+						item[labelKey]
 
 
 
@@ -125,14 +138,17 @@ tag chekbox-input
 	prop id
 	prop label
 	prop onChange
+	prop value
 	
 	bool = no
 
 	def onchange
-		onChange bool
+		onChange bool if onChange
 
 	<self>
-		<input[mr:1] type='checkbox' bind=bool @change=onchange />
+		<label>
+			<input[mr:1] type='checkbox' bind=value @change=onchange />
+			label
 
 
 
@@ -176,11 +192,15 @@ tag text-input
 	prop required\boolean = no
 	prop onChange
 
+	def handleChange evt
+		# console.log evt
+		onChange(evt.target.value) if onChange
+
 	<self>
 		<label[c:cool8]> 
 			label
 			<span[c:red5]> " *" if required
-			<input.simple-input type="text" placeholder=placeholder bind=data>
+			<input.simple-input type="text" @change=handleChange placeholder=placeholder bind=data>
 
 
 tag number-input
@@ -195,3 +215,31 @@ tag number-input
 			<span[c:red5]> " *" if required
 			<input.simple-input type="number" bind=data>
 
+
+tag date-input
+	prop label\string
+	prop data\number
+	prop required\boolean = no
+	prop onChange
+
+	<self>
+		<label[c:cool8]>
+			label
+			<span[c:red5]> " *" if required
+			<input.simple-input type="date" bind=data>
+
+
+
+tag text-area-input
+	prop label\string
+	prop placeholder\string = ""
+	prop data\string
+	prop required\boolean = no
+	prop rows\number = 4
+	prop onChange
+
+	<self>
+		<label[c:cool8]> 
+			label
+			<span[c:red5]> " *" if required
+			<textarea.simple-input rows=rows placeholder=placeholder bind=data>

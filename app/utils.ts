@@ -191,7 +191,7 @@ export const toggleStringList =
 		return [...list, value];
 	};
 
-export function adjust(color: string, amount: number): string {
+export function adjustColor(color: string, amount: number): string {
 	return (
 		"#" +
 		color
@@ -204,3 +204,23 @@ export function adjust(color: string, amount: number): string {
 			)
 	);
 }
+
+export function getVignetteAgeString(age: {
+	years: number;
+	months: string;
+	days: string;
+}): string {
+	return `${age.years} yrs, ${age.months} months and ${age.days} days`;
+}
+
+export const isResourceContributor = (resource: any) => (userId: string) => {
+	if (resource?.ownerId === userId) {
+		return true;
+	} else if (
+		resource?.metadata?.contributors?.findIndex((ct) => ct.id === userId) > -1
+	) {
+		return true;
+	}
+
+	return false;
+};

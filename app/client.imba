@@ -1,3 +1,6 @@
+import { DatasetSummary } from './screens/DatasetSummary'
+import { CreateDataset } from './screens/create-dataset'
+import { ConfirmAccount } from './screens/confirm-account'
 import { VignetteCreator } from './screens/vignette-creator'
 import { Profile } from './screens/Profile'
 import { UpdateProfile } from './screens/UpdateProfile'
@@ -16,7 +19,7 @@ import { SimpleInput } from './components/simple-input'
 import {SignIn} from "./sign-in.imba"
 import conditions from './data/conditions.ts'
 import { SymptomEditor } from './components/symptom-editor'
-import {conditionsDb} from "./realm.ts"
+import { ensureLoggedIn, conditionsDb, loginAnonymous, app} from "./realm.ts"
 
 global css html
 	ff:'Roboto', sans
@@ -49,57 +52,65 @@ global css
 	button.primary bgc:$primary c:white
 
 
-
 tag app
 	css button p:2 bgc:blue2 bw:0 rd:3 bgc@hover:blue3 cursor:pointer
 
-	<self>
-		<Header>
+	def render
+		<self>
+			<Header>
 
 
-		<div.container route="/sign-in$">
-			<SignIn>
+			<div.container route="/sign-in$">
+				<SignIn>
 
-		<div.container route="/update-profile$">
-			<UpdateProfile>
+			<div.container route="/update-profile$">
+				<UpdateProfile>
 
-		<div.container route="/profile/:id$">
-			<Profile>
+			<div.container route="/profile/:id$">
+				<Profile>
 
-		<div route="/$">
-			<Home>
+			<div route="/$">
+				<Home>
 
-		<div.container route="/explore-models">
-			<ExploreModels>
+			<div.container route="/explore-models">
+				<ExploreModels>
 
-		<div.container route="/explore-data">
-			<ExploreData>
+			<div.container route="/confirm-account">
+				<ConfirmAccount>
 
-		<div.container route="/create-condition">
-			<CreateCondition>
+			<div.container route="/datasets$">
+				<ExploreData>
+			
+			<div.container route="/datasets/view/:id$">
+				<DatasetSummary>
 
-		<div.container route="/create-condition-model">
-			<CreateConditionModel>
+			<div.container route="/datasets/view/:id/create-vignette">
+				<VignetteCreator>
 
-		<div.container route="/condition/:condition$">
-			<ConditionModels>
+			<div.container route="/datasets/create-dataset$">
+				<CreateDataset>
 
-		<div.container route="/condition/:condition/:id$">
-			<ConditionEditor>
+			<div.container route="/create-condition">
+				<CreateCondition>
 
-		<div.container route="/condition/:condition/:id/evaluations$">
-			<ModelEvaluations>
+			<div.container route="/create-condition-model">
+				<CreateConditionModel>
 
-		<div.container route="/run-assessments">
-			<RunAssessments>
+			<div.container route="/condition/:condition$">
+				<ConditionModels>
+
+			<div.container route="/condition/:condition/:id$">
+				<ConditionEditor>
+
+			<div.container route="/condition/:condition/:id/evaluations$">
+				<ModelEvaluations>
+
+			<div.container route="/run-assessments">
+				<RunAssessments>
 
 
-		<div.container route="/vignette-creator">
-			<VignetteCreator>
-
-
-		<div route="/playground$">
-			<Playground>
+			<div route="/playground$">
+				<Playground>
 
 
 imba.mount <app>

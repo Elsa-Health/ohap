@@ -34,7 +34,7 @@ export tag CreateCondition
 				upcatedAt: new Date(),
 			})
 
-			window.alert(`Successfully created and saved the ${condition.name} model`);
+			window.alert(`Successfully created and saved the {condition.name} model`);
 
 			condition = { name: "" };
 			# TODO: Go to the model definition/editor page??

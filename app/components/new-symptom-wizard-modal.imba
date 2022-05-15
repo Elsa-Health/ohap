@@ -312,8 +312,7 @@ export tag NewSymptomWizardModal
 
 
 						<div[mt:4]>
-							<p>
-								"In percentages, how often does this symptom happen for Males and Females"
+							<p> "In percentages, how often does this symptom happen for Males and Females"
 
 							<div>
 								<label[fw:500]> "Males (as a percentage %): "
@@ -432,7 +431,7 @@ export tag NewSymptomWizardModal
 								"On average, this symptom lasts "
 								<input[w:13] bind=syState.duration.mean min=0 type="number">
 								" +/- "
-								<input[w:12] bind=syState.duration.sd min=0 type="number">
+								<input[w:12] bind=syState.duration.sd min=1 type="number">
 								" days."
 
 							<button type="button" @click=(markSymptomAsForever)> "This symptom lasts forever"

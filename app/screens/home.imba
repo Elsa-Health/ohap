@@ -24,8 +24,8 @@ tag Hero
 
 
 		<div[d:flex jc:center mt:10 fld@lt-md:column]>
-			<button.cta route-to="/explore-models"> "Explore Disease Models"
-			<button.cta route-to="/explore-data"> "Data & Vignettes"
+			<button.explore-models.cta route-to="/explore-models"> "Explore Disease Models"
+			<button.explore-data.cta route-to="/datasets"> "Data & Vignettes"
 			# <button.learn-more> "Learn More"
 			# <input[w:100 fs:x-large p:2]>
 

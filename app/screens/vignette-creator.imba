@@ -1,3 +1,5 @@
+import Realm, { datasetsDb } from '../realm.ts'
+import {last} from "lodash"
 import riskFactors from '../data/riskFactors.ts'
 import {SymptomInputForm} from "../components/assessment-interact"
 import "../components/@ui/input"
@@ -18,7 +20,7 @@ let investigationItem = {
 	}
 }
 
-let vignette = {
+let vignette_template = {
 	condition: ""
 	presentation: "typical"
 	age: {
@@ -55,6 +57,8 @@ let vignette = {
 	differentials: []
 }
 
+let vignette = JSON.parse(JSON.stringify(vignette_template))
+
 
 const casePresentationOptions  = [
 	{
@@ -84,7 +88,7 @@ const investigationOptions = invsList.map do(inv)
 	{
 		...inv
 		value: inv.name
-		label: inv.name,
+		label: inv._.isPanel ? "{inv._.panelAlias} - {inv.name}" : inv.name,
 		result: {
 			value: inv.type === "boolean" ? false : "",
 			description: ""
@@ -94,6 +98,7 @@ const investigationOptions = invsList.map do(inv)
 const symptomOptions = symptomsList.map do(sym)
 	{
 		...sym,
+		name: friendlySymptomName(sym.symptom),
 		value: sym.symptom,
 		label: friendlySymptomName(sym.symptom)
 	}
@@ -127,7 +132,7 @@ const normalityTestOptions = [
 	}
 ]
 
-
+let corpusId = ""
 
 let symptomSearch = searchForSymptom(symptomsList)
 let getSymptom = getSymptomByName(symptomsList)
@@ -138,6 +143,11 @@ export tag VignetteCreator
 
 	css pb:30
 	css .fluid-grid d:grid gtc@lg:repeat(4, 1fr) gtc:repeat(1, 1fr) gcg:1.2rem grg:1.2rem
+
+	def mount
+		const pathname = window.location.pathname.split("/")
+		corpusId = last(pathname.slice(0, pathname.length - 1))
+		console.log corpusId
 
 
 	def selectEvidence evidence
@@ -177,8 +187,31 @@ export tag VignetteCreator
 			sy.name !== symptomName
 
 
+	def completeFields vignette
+		const fields = ["condition", "presentation"]
+		const complete = fields.every do(f)
+			vignette[f].length > 0
+
+		return complete
+
+
 	def submitVignette
+		if !completeFields(vignette)
+			window.alert "Please enter all the required fields"
+			return;
+		
+		
 		const confirmed = window.confirm "Please confirm that you are submitting the vignette?"
+
+		try
+			const result = await datasetsDb.updateOne({ _id: new Realm.BSON.ObjectID(corpusId) }, {$addToSet: { "data.vignettes": {...vignette, createdAt: new Date(), updatedAt: new Date()} }})
+
+			window.alert "Successfully created new vignette!"
+			vignette = { ...vignette_template }
+		catch error
+			console.log {error}
+			window.alert "There was an error creating the new vignette. Please contact support."
+
 
 		console.log vignette, confirmed
 
@@ -208,7 +241,7 @@ export tag VignetteCreator
 					<number-input required=yes bind=vignette.age.years label="Years">
 					<number-input required=yes bind=vignette.age.months label="Months">
 					<number-input required=yes bind=vignette.age.days label="Days">
-					<select-input required options=sexOptions bind=vignette.sex label="Sex">
+					<select-input required options=sexOptions bind=vignette.sex labelKey="label" label="Sex">
 					<text-input required label="Country" bind=vignette.country>
 					<number-input required=yes bind=vignette.height.value label="Height (cm)">
 					<number-input required=yes bind=vignette.weight.value label="Weight (kg)">

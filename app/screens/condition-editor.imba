@@ -1,10 +1,10 @@
 import { distributions } from '@elsa-health/model-runtime'
 import type { Symptom } from '@elsa-health/model-runtime/dist/public-types'
-import {last} from "lodash"
+import { clone, merge, omit,last} from "lodash"
 import axios from "axios"
 import riskFactors from "../data/riskFactors"
 import { TryModel } from '../components/try-model'
-import { toggleStringList, rescaleList, friendlySymptomName, getSymptomTemplate, searchForSymptom, formatFriendlyModel, formatFriendlySymptom, softenSymptomBetas } from '../utils.ts'
+import { isResourceContributor, toggleStringList, rescaleList, friendlySymptomName, getSymptomTemplate, searchForSymptom, formatFriendlyModel, formatFriendlySymptom, softenSymptomBetas } from '../utils.ts'
 import '../components/symptoms-timeline'
 import '../components/condition-investigation-findings'
 import { SymptomEditor } from '../components/symptom-editor'
@@ -12,6 +12,8 @@ import { NewSymptomWizardModal } from '../components/new-symptom-wizard-modal.im
 import { SliderInput } from '../components/slider-input.imba'
 import {AssessmentInteract} from "../components/assessment-interact.imba"
 import "../components/modal.imba"
+import "../components/loading-progress-bar.imba"
+import "../components/add-contributor-form.imba"
 import Realm, {modelsDb, app} from "../realm.ts"
 import { commentsDb } from "../realm.ts"
 
@@ -28,6 +30,12 @@ const defaultSummary = {
 	falseNegative: 0.0,
 }
 
+const defaultMetadata = { 
+	performance: defaultSummary, 
+	activity: { likes: 0, downloads: 0 }
+	contributors: []
+}
+
 # let state = dummyModel
 let state = {
 	ownerId: "",
@@ -37,13 +45,16 @@ let state = {
 	symptoms: [],
 	signs: [],
 	investigations: [],
-	stages: []
+	stages: [],
+	metadata: defaultMetadata
 	# symptoms: [
 	# 	randomSymptom("fever"),
 	# 	randomSymptom("cough"),
 	# 	randomSymptom("sore throat"),
 	# 	],
 }
+
+
 
 let resetState = do
 	state = {
@@ -54,7 +65,8 @@ let resetState = do
 		symptoms: [],
 		signs: [],
 		investigations: [],
-		stages: []
+		stages: [],
+		metadata: defaultMetadata
 	}
 
 let symptomState\Symptom = getSymptomTemplate()
@@ -78,11 +90,24 @@ let showInvestigationsManager = false
 
 let showCommentDialogue = false
 
+let showAddContributor = false
+
 # Indicates whether the model is in saving progress or not
 let savingModel = false
 
 let comments = []
 let expandedComments = false
+
+
+def isModelContributor userId\string, state
+	if userId == state.ownerId
+		return true
+	elif state.metadata && state.metadata.contributors
+		const idx = state.metadata.contributors.findIndex do(cont)
+			cont.id === userId
+		return idx > -1
+	else
+		return false
 
 export tag ConditionEditor
 	def deleteModel
@@ -130,15 +155,22 @@ export tag ConditionEditor
 		document.body.removeChild(a)
 
 	def saveModel
-		const conditionModel = {
+		# TODO: Check that the user is allowed to contribute to the model
+		const conditionModel = omit({
 			...state, 
 			updatedAt: new Date(), 
 			symptoms: softenSymptomBetas(state.symptoms), 
-			metadata: { 
-				performance: defaultSummary, 
-				activity: { likes: 0, downloads: 0 } 
-			}
-		}
+			metadata: defaultMetadata
+		}, ["_id"])
+
+		const incorrectDurations = state.symptoms.filter do(sy)
+			sy.duration.sd <= 0 || sy.duration.mean <= 0
+
+		if (incorrectDurations.length > 0)
+			const n = incorrectDurations[0].name
+			window.alert "Durations must be longer than 0 days +/- 1 or more days. Please verify the symptom of {n}"
+			return;
+
 		const confirmation = window.confirm "Please confirm that you want to save this {conditionModel.name} model"
 		if !confirmation
 			return
@@ -227,9 +259,11 @@ export tag ConditionEditor
 
 		# return;
 		# TODO: add try catch
-		const res = await modelsDb.findOne({_id: new Realm.BSON.ObjectID(conditionId)})
+		# const res = await modelsDb.findOne({_id: new Realm.BSON.ObjectID(conditionId)})
+		const res = await axios.get("https://eu-central-1.aws.data.mongodb-api.com/app/elsa-models-lqpbx/endpoint/model?id={conditionId}")
 		resetState!
-		state = {...state, ...res}
+		const metadata = merge(clone(defaultMetadata), clone(res.data.metadata))
+		state = {...state, ...res.data, metadata}
 		loadingConditionModel = false
 
 		if res && res._id
@@ -243,9 +277,14 @@ export tag ConditionEditor
 
 
 	def render
+		console.log state
 		<self>
 			<div[d:{savingModel ? "block" : "none"}]>
 				"Please wait while saving the model"
+
+
+			<modal size="sm" title="Add Contributor" onClose=(do() showAddContributor = false) open=showAddContributor>
+				<add-contributor-form resourceType="model" resourceId=conditionId resourceName=state.name onClose=(do() showAddContributor = false)>
 
 			<modal title="Risk Factors" onClose=(do() showRiskFactorsManager = false) open=showRiskFactorsManager>
 				<manage-risk-factors
@@ -285,22 +324,33 @@ export tag ConditionEditor
 						<div[mt:2]>
 							<SymptomEditor bind=symptomState  submitSymptom=submitSymptom>
 					else if view === "view-summary"
-						<div[d:flex cg:2 mb:3]>
+						<div[d:flex flw:wrap rg:1.5 cg:2 mb:3]>
 							# <button @click=(toggleAddSymptom)> "Add Symptom"
-							if app.currentUser.id == state.ownerId
+							if isResourceContributor(state)(app.currentUser && app.currentUser.id)
 								<button.button @click=(showSymptomWizard = true)> "Add Symptom"
 								<button.button @click=(showRiskFactorsManager = true)> "Risk Factors"
 								<button.button @click=(showInvestigationsManager = true)> "Investigations & Findings"
 								<button.button @click=saveModel> "Save Model"
 								<button.button @click=deleteModel> "Delete Model"
-							if app.currentUser && app.currentUser.data
+								<button.button @click=(showAddContributor = true)> "Add Contributors"
+							if app.currentUser && app.currentUser.id
 								<button @click=(showCommentDialogue = true)> "Comment"
 							
 							<button.button @click=downloadModel> "Download"
 
 							if state.metadata and state.metadata.performance
 								<button type="button" route-to="/condition/{state.condition}/{state._id.toString()}/evaluations"> "View Evaluation Results"
+
+
 						<symptoms-timeline selectSymptom=selectSymptom symptoms=sortByEarliest(state.symptoms) stages=(state.stages)>
+
+						<div[pt:4]>
+							<[fs:large fw:600 mb:1]> "Contributors {state.metadata.contributors.length}"
+							for person in state.metadata.contributors
+								<div[pb:3]>
+									"Contributor: {person.email.split('@')[0]}"
+									<br>
+									"Role: {person.role}"
 					
 						<div[pt:4]>
 							<div[d:flex]>
@@ -318,6 +368,9 @@ export tag ConditionEditor
 						<div[pt:10]>
 							<.text-2xl> "Try running the model here"
 							<AssessmentInteract diseaseModels=[state] >
+
+
+
 
 tag ModelCommentDialogue
 	css h:100vh pos:fixed bg:rgba(10,10,10,0.4) l:0 t:0 w:100vw zi:9999 transition-duration:0.5s tween:ease-in ofy:scroll

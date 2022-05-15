@@ -86,7 +86,7 @@ tag create-condition-form
 export tag ConditionListItem
 	css shadow:md p:4 my:2 shadow@hover:lg cursor:pointer rd:4
 
-	<self route-to=`/condition/${data.condition}/${data._id}`>
+	<self route-to=`/condition/{data.condition}/{data._id}`>
 		<[fs:large mb:2]> data.name
 		<[fs:small mb:2]> 
 			"Condition: "+ friendlySymptomName data.condition

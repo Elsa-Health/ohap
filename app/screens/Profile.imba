@@ -1,4 +1,4 @@
-import Realm, {modelsDb, app} from "../realm.ts"
+import Realm, { invitationsDb,modelsDb, app} from "../realm.ts"
 import {format} from "date-fns"
 import {last} from "lodash"
 
@@ -13,6 +13,8 @@ let profile = {
 	email: "",
 	createdAt: new Date()
 }
+
+let invitations = []
 
 let myModels = []
 let modelSearchStr = ""
@@ -44,6 +46,11 @@ export tag Profile
 			myModels = modelRes
 			updateTabChipCount "My models", myModels.length
 
+
+			const invitationsRes = await invitationsDb.find({ email: app.currentUser.profile.email, status: "pending" })
+			console.log {invitationsRes}
+			invitations = invitationsRes
+
 			# const vignettesRes = []
 			myVignettes = []
 			myDatasets = []
@@ -64,11 +71,52 @@ export tag Profile
 				return { ...t, count }
 			return t
 
+	def acceptInvitation invitation\Invitation, accepted\boolean
+		const id = invitation._id.toString()
+		const body = {
+			inviteId: id,
+			resourceId: invitation.resourceId,
+			resourceType: invitation.resourceType,
+			accepted,
+			email: invitation.email,
+			senderId: invitation.senderId
+			contributor: {
+				email: app.currentUser.profile.email,
+				id: app.currentUser.id,
+				role: invitation.role,
+				createdAt: new Date(),
+				updatedAt: new Date(),
+			}
+		}
+
+		try
+			const result = await app.currentUser.callFunction("acceptInvitation", { ...body })
+			console.log({result});
+			if result.status === 200
+				window.alert "Successfully updated your invitation!"
+				invitations = invitations.filter do(inv)
+					inv._id.toString() !== id
+			else 
+				throw new Error(result.error)
+		catch error
+			console.error({error})
+			window.alert "There was an error updating your invitation. Please try again."
+		
+
 
 	def render
 		activeTab = tabs[activeTabIndex]
 		<self>
 			<.text-4xl> "Welcome, {profile.name.first} {profile.name.last}"
+
+			<div>
+				for invitation in invitations
+					<notification[mb:4] title="Invitation to collaborate on the {invitation.resourceName} {invitation.resourceType}">
+						"Your invitation from {invitation.senderEmail} is waiting for you. If you accept this invitation, you will be able to contribute to the development of the model."
+						
+						<div[d:flex cg:4 mt:1.4] slot="actions">
+							<ui-button @click=(acceptInvitation invitation, true) compact variant="subtle" size="md" > "Accept Invitation"
+							<ui-button @click=(acceptInvitation invitation, false) compact variant="subtle" size="md" color="red"> "Reject Invitation"
 
 
 			<tab-view 
@@ -92,6 +140,23 @@ export tag Profile
 							<td>
 								<a href="{document.location.origin}/condition/{model.condition}/{model._id.toString()}"> "Edit / Update"
 
+
+tag notification
+	prop title\string = ""
+	prop disallowClose\boolean = false
+
+	css d:flex
+
+
+	<self>
+		<slot name="icon">
+			<[w:2 bgc:blue4 rd:md mr:4]>
+		<div>
+			<[fs:1.4rem]> title
+			<[c:cool5]>
+				<slot>
+
+			<slot name="actions">
 
 
 tag table-ui
