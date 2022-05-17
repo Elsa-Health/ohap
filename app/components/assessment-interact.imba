@@ -123,14 +123,13 @@ export tag AssessmentInteract
 
 
 export tag SymptomInputForm
-
-	css .options-wrapper > button mr:2 py:1 px:6 fs:sm bgc:white bd:1px solid cool4 rd:2 cursor:pointer bgc@hover:$blue c@hover:white mb:1
-	css .options-wrapper > button.active-option bgc:$blue c:white
-
-
 	prop symptom\SymptomItem
 	prop remove
 	prop data
+	prop isChiefComplaint\boolean = false
+
+	css .options-wrapper > button mr:2 py:1 px:6 fs:sm bgc:white bd:1px solid cool4 rd:2 cursor:pointer bgc@hover:$blue c@hover:white mb:1
+	css .options-wrapper > button.active-option bgc:$blue c:white
 
 
 	def setField symptomName, fieldName, value
@@ -141,60 +140,81 @@ export tag SymptomInputForm
 	def chooseOption symptomName, fieldName, value
 		data[fieldName] = toggleStringList(data[fieldName])(value)
 		# data.symptoms = data.symptoms.map((do(sy) sy.name == symptomName ? ({ ...sy, [fieldName]: toggleStringList(sy[fieldName])(value)}) : sy))
+	
+	def render
+		console.log "SYMPTIM: ", symptom, data
+		<self>
+			if symptom
+				<div[d:flex jc:space-between]>
+					<.text-xl> 
+						friendlySymptomName(symptom.symptom)
+					<span[cursor:pointer] @click=(remove(symptom.symptom))> "Close"
 
-	<self>
-		if symptom
-			<div[d:flex jc:space-between]>
-				<.text-xl> 
-					friendlySymptomName(symptom.symptom)
-				<span[cursor:pointer] @click=(remove(symptom.symptom))> "Close"
+				<div[pt:2]>
+					<chekbox-input bind=isChiefComplaint value=symptom.symptom label="This is a chief complaint">
 
-			<div>
-				<p[mb:1]> "Duration"
-				<input[p:2 w:100%] placeholder="Days ..." value=data.duration @change=(setField symptom.symptom, "duration", e.target.value) min=0 type="number">
+				<div>
+					<p[mb:1]> "Duration"
+					<input[p:2 w:100%] placeholder="Days ..." value=data.duration @change=(setField symptom.symptom, "duration", e.target.value) min=0 type="number">
 
-			if symptom.location && symptom.location.length > 0
-				<div[mt:4]>
-					<p[mb:1]> "Locations"
-					<div.options-wrapper>
-						for loc in symptom.location
-							<button .active-option=(data.locations.includes(loc)) @click=(chooseOption symptom.symptom, "locations", loc) type="button"> friendlySymptomName loc
+				if symptom.location && symptom.location.length > 0
+					<div[mt:4]>
+						<p[mb:1]> "Locations"
+						<div.options-wrapper>
+							for loc in symptom.location
+								<button .active-option=(data.locations.includes(loc)) @click=(chooseOption symptom.symptom, "locations", loc) type="button"> friendlySymptomName loc
 
-			if symptom.onset && symptom.onset.length > 0
-				<div[mt:4]>
-					<p[mb:1]> "Onset"
-					<div.options-wrapper>
-						for ons in symptom.onset
-							<button @click=(setField symptom.symptom, "onset", ons) .active-option=(data.onset == ons) type="button"> friendlySymptomName ons
+				if symptom.onset && symptom.onset.length > 0
+					<div[mt:4]>
+						<p[mb:1]> "Onset"
+						<div.options-wrapper>
+							for ons in symptom.onset
+								<button @click=(setField symptom.symptom, "onset", ons) .active-option=(data.onset == ons) type="button"> friendlySymptomName ons
 
 
-			if symptom.periodicity && symptom.periodicity.length > 0
-				<div[mt:4]>
-					<p[mb:1]> "Periodicity"
-					<div.options-wrapper>
-						for per in symptom.periodicity
-							<button @click=(setField symptom.symptom, "periodicity", per) .active-option=(data.periodicity == per) type="button"> friendlySymptomName per
+				if symptom.periodicity && symptom.periodicity.length > 0
+					<div[mt:4]>
+						<p[mb:1]> "Periodicity"
+						<div.options-wrapper>
+							for per in symptom.periodicity
+								<button @click=(setField symptom.symptom, "periodicity", per) .active-option=(data.periodicity == per) type="button"> friendlySymptomName per
 
-			if symptom.nature && symptom.nature.length > 0
-				<div[mt:4]>
-					<p[mb:1]> "Nature"
-					<div.options-wrapper>
-						for nat in symptom.nature
-							<button .active-option=(data.nature.includes(nat)) @click=(chooseOption symptom.symptom, "nature", nat) type="button"> friendlySymptomName nat
+				if symptom.nature && symptom.nature.length > 0
+					<div[mt:4]>
+						<p[mb:1]> "Nature"
+						<div.options-wrapper>
+							for nat in symptom.nature
+								<button .active-option=(data.nature.includes(nat)) @click=(chooseOption symptom.symptom, "nature", nat) type="button"> friendlySymptomName nat
 
-			if symptom.aggravators && symptom.aggravators.length > 0
-				<div[mt:4]>
-					<p[mb:1]> "Aggravators"
-					<div.options-wrapper>
-						for agg in symptom.aggravators
-							<button .active-option=(data.aggravators.includes(agg)) @click=(chooseOption symptom.symptom, "aggravators", agg) type="button"> friendlySymptomName agg
+				if symptom.aggravators && symptom.aggravators.length > 0
+					<div[mt:4]>
+						<p[mb:1]> "Aggravators"
+						<div.options-wrapper>
+							for agg in symptom.aggravators
+								<button .active-option=(data.aggravators.includes(agg)) @click=(chooseOption symptom.symptom, "aggravators", agg) type="button"> friendlySymptomName agg
 
-			if symptom.relievers && symptom.relievers.length > 0
-				<div[mt:4]>
-					<p[mb:1]> "Relievers"
-					<div.options-wrapper>
-						for rel in symptom.relievers
-							<button .active-option=(data.relievers.includes(rel)) @click=(chooseOption symptom.symptom, "relievers", rel) type="button"> friendlySymptomName rel
+				if symptom.relievers && symptom.relievers.length > 0
+					<div[mt:4]>
+						<p[mb:1]> "Relievers"
+						<div.options-wrapper>
+							for rel in symptom.relievers
+								<button .active-option=(data.relievers.includes(rel)) @click=(chooseOption symptom.symptom, "relievers", rel) type="button"> friendlySymptomName rel
+
+
+				if symptom.radiation && symptom.radiation.length > 0
+					<div[mt:4]>
+						<p[mb:1]> "Radiation"
+						<div.options-wrapper>
+							for rad in symptom.radiation
+								<button .active-option=(data.radiation.includes(rad)) @click=(chooseOption symptom.symptom, "radiation", rad) type="button"> friendlySymptomName rad
+
+
+				if symptom.severity && symptom.severity.length > 0
+					<div[mt:4]>
+						<p[mb:1]> "Severity"
+						<div.options-wrapper>
+							for sev in symptom.severity
+								<button .active-option=(data.severity == sev)  @click=(setField symptom.symptom, "severity", sev) type="button"> friendlySymptomName sev
 
 
 

@@ -1,21 +1,55 @@
-# Getting Started
+# Elsa Open Health Algorithms Platform (OHAP)
 
-This project was bootstrapped with [imba-base-template](https://github.com/imba/imba-base-template).
+The Open Health Algorithms Platform is a development community of healthcare experts and technology experts providing the tools needed to build the digital health future.
 
-Ask ally for the realm.ts file that is needed to connect to the database.
+The community is open and inviting to all and any contributors, and can be found at [https://open.elsa.health](https://open.elsa.health).
 
-## Available Scripts
+## Badges
 
-In the project directory, you can run:
+[![Apache 2.0 License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](http://www.gnu.org/licenses/agpl-3.0)
 
-### `npm start`
+## Run Locally
 
-Runs the app in the development mode.
+Clone the project
+
+```bash
+  git clone https://github.com/Elsa-Health/modelling-ui
+```
+
+Go to the project directory
+
+```bash
+  cd modelling-ui
+```
+
+Install dependencies
+
+```bash
+  npm install
+```
+
+Start the app
+
+```bash
+  npm run start
+```
+
 Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
 
-The page will reload if you make edits.
-You will also see any lint errors in the console.
+## Tech Stack
 
-### `npm run build`
+**Client:** Imba, Realm
 
-Builds the app for production to the `dist` folder.
+**Server:** Imba, Mongodb (Atlas)
+
+## Contributing
+
+Contributions are always welcome!
+
+Please visit this link for the contribution guidelines: [https://opensource.elsa.health/contribution-guidelines](https://opensource.elsa.health/contribution-guidelines)
+
+Please adhere to this project's `code of conduct`.
+
+## License
+
+[Apache License 2.0](https://choosealicense.com/licenses/apache-2.0/)

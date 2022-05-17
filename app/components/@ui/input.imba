@@ -138,7 +138,8 @@ tag chekbox-input
 	prop id
 	prop label
 	prop onChange
-	prop value
+	prop data
+	prop value\string
 	
 	bool = no
 
@@ -147,7 +148,7 @@ tag chekbox-input
 
 	<self>
 		<label>
-			<input[mr:1] type='checkbox' bind=value @change=onchange />
+			<input[mr:1] type='checkbox' value=value bind=data @change=onchange />
 			label
 
 

@@ -1,3 +1,5 @@
+import medications from '../data/medications.ts'
+import allergies from '../data/allergies.ts'
 import Realm, { datasetsDb } from '../realm.ts'
 import {last} from "lodash"
 import riskFactors from '../data/riskFactors.ts'
@@ -52,8 +54,12 @@ let vignette_template = {
 		}
 	},
 	symptoms: []
+	chiefComplaints: []
 	investigations: []
 	riskFactors: []
+	allergies: []
+	recentMedications: []
+	recentInfectedPersonContact: []
 	differentials: []
 }
 
@@ -154,6 +160,7 @@ export tag VignetteCreator
 		console.log evidence
 
 	def updateSymptoms symptoms
+		console.log symptoms
 		# create new symptom
 		let res = symptoms.map do(sy)
 			let name = sy.symptom || sy.name
@@ -171,6 +178,8 @@ export tag VignetteCreator
 				periodicity: 'intermittent',
 				aggravators: [],
 				relievers: [],
+				severity: "",
+				radiation: []
 				...existingSymptom
 			}
 		vignette.symptoms = res
@@ -196,6 +205,7 @@ export tag VignetteCreator
 
 
 	def submitVignette
+		console.log vignette
 		if !completeFields(vignette)
 			window.alert "Please enter all the required fields"
 			return;
@@ -217,7 +227,7 @@ export tag VignetteCreator
 
 	def render
 		# const testNames = vignette.investigations.map((do(itm) itm.label))
-		# console.log vignette.investigations
+		console.log getSymptom("abdominal-pain")
 		<self>
 			<.text-3xl[lh:normal]> "Condition Vignette Creator"
 			<[c:cool6]> "Use this form to create clinical case vignettes for any of the conditions supported by the platform."
@@ -225,19 +235,13 @@ export tag VignetteCreator
 			<div[mt:8]>
 				<select-input[my:2] required label="Condition" options=conditionOptions bind=vignette.condition onChange=(do(val) vignette.condition = val)>
 
-
 				<radio-input-group[mt:4] bind=vignette.presentation orientation="vertical" label="Case Presentation Type" options=casePresentationOptions required>
 
-
-			
-			<hr[bc:cool1/20 my:8]>
-
-			<div>
-				<.text-lg> "Patient Demographics"
-				<span[fs:xs c:cool5]> "Describe the patients demographics."
+			<hr[bc:cool1/20 mt:4]>
 
 
-				<div.fluid-grid[pt:2]>
+			<vignette-creator-section title="Patient Demographics" description="Describe the patients demographics">
+				<div.fluid-grid>
 					<number-input required=yes bind=vignette.age.years label="Years">
 					<number-input required=yes bind=vignette.age.months label="Months">
 					<number-input required=yes bind=vignette.age.days label="Days">
@@ -245,16 +249,10 @@ export tag VignetteCreator
 					<text-input required label="Country" bind=vignette.country>
 					<number-input required=yes bind=vignette.height.value label="Height (cm)">
 					<number-input required=yes bind=vignette.weight.value label="Weight (kg)">
+			
 
-
-			<hr[bc:cool1/20 my:8]>
-
-			<div>
-				<.text-lg> "Patient Vitals"
-				<span[fs:xs c:cool5]> "Patient vital information you expect to see."
-
-
-				<div.fluid-grid[pt:2]>
+			<vignette-creator-section title="Patient Vitals" description="Patient vital information you expect to see.">
+				<div.fluid-grid>
 					<number-input required=yes bind=vignette.vitals.temperature.value label="Temperature (Celcius)">
 					<number-input required=yes bind=vignette.vitals["respiratory-rate"] label="Respiratory Rate (bpm)">
 					<number-input required=yes bind=vignette.vitals["heart-rate"] label="Heart Rate">
@@ -263,58 +261,65 @@ export tag VignetteCreator
 					<number-input required=yes bind=vignette.vitals["blood-pressure"].diastolic label="Blood pressure (Diastolic)">
 
 
-			<hr[bc:cool1/20 my:8]>
-
-			<div>
-				<.text-lg> "Patient Presentation"
-				<span[fs:xs c:cool5]> "Information about the patient you can observe as well as their complaints - this is the evidence presented."
-
-
-				<div[pt:2]>
-					<multi-select-input[my:2] 
-						required
-						label="Search symptoms & signs"
-						labelKey="name"
-						options=symptomOptions 
-						onChange=updateSymptoms
-						data=vignette.symptoms>
+			<vignette-creator-section title="Patient Presentation" description="Information about the patient you can observe as well as their complaints - this is the evidence presented.">
+				<multi-select-input[my:2] 
+					required
+					label="Search symptoms & signs"
+					labelKey="name"
+					options=symptomOptions 
+					onChange=updateSymptoms
+					data=vignette.symptoms>
 
 
 				<div[d:grid gtc:repeat(2, 1fr) gtc@lt-sm:1 pt:2 gcg:2rem grg:2rem pl@md:4rem]>
 					for sym in vignette.symptoms
 						<div[bgc:cool1 p:2rem rd:md]>
-							<SymptomInputForm remove=removeSymptom symptom=getSymptom(sym.name) remove=removeSymptom bind=sym >
+							<SymptomInputForm bind:isChiefComplaint=vignette.chiefComplaints remove=removeSymptom symptom=getSymptom(sym.name) remove=removeSymptom bind=sym >
 
-			<hr[bc:cool1/20 my:8]>
+			<vignette-creator-section title="Risk Factors" description="Are there risk factors associated with this particular vignette?">
+				<multi-select-input[my:2] 
+					required
+					label="Search factors"
+					# labelKey="value"
+					options=riskFactors.map((do(rf) { ...rf, value: rf.name, label: friendlySymptomName rf.name })) 
+					onChange=console.log
+					bind=vignette.riskFactors>
 
-			<div>
-				<.text-lg> "Risk Factors"
-				<span[fs:xs c:cool5]> "Are there risk factors associated with this particular vignette?"
+			<vignette-creator-section title="Recent infected person contact?" description="Does the patient report contact with a patient suffering from a disease?">
+				<multi-select-input[my:2] 
+					required
+					label="Search conditions" 
+					options=conditionOptions 
+					bind=vignette.recentInfectedPersonContact
+					# onChange=updateDifferentials
+					>
+
+			<vignette-creator-section title="Known Allergies" description="What allergies does the patient have?">
+				<multi-select-input[my:2] 
+					required
+					label="Search allergies"
+					# labelKey="value"
+					options=allergies.map((do(rf) { ...rf, value: rf.name, label: friendlySymptomName rf.name })) 
+					onChange=console.log
+					bind=vignette.allergies>
 
 
-				<div[pt:2]>
-					<multi-select-input[my:2] 
-						required
-						label="Search factors"
-						# labelKey="value"
-						options=riskFactors.map((do(rf) { ...rf, value: rf.name, label: friendlySymptomName rf.name })) 
-						onChange=console.log
-						bind=vignette.riskFactors>
+			<vignette-creator-section title="Recent Medications" description="What are the medcations the patient is currently on or recntly in use?">
+				<multi-select-input[my:2] 
+					required
+					label="Search medications"
+					# labelKey="value"
+					options=medications.map((do(rf) { ...rf, value: rf.name, label: friendlySymptomName rf.name })) 
+					onChange=console.log
+					bind=vignette.recentMedications>
 
-			<hr[bc:cool1/20 my:8]>
-
-			<div>
-				<.text-lg> "Tests & Investigations"
-				<span[fs:xs c:cool5]> "What were the tests done and the results of those tests"
-
-
-				<div[pt:2]>
-					<multi-select-input[my:2] 
-						required
-						label="Search tests" 
-						options=investigationOptions 
-						bind=vignette.investigations 
-						onChange=updateInvestigations>
+			<vignette-creator-section title="Tests & Investigations" description="What were the tests done and the results of those tests">
+				<multi-select-input[my:2] 
+					required
+					label="Search tests" 
+					options=investigationOptions 
+					bind=vignette.investigations 
+					onChange=updateInvestigations>
 
 
 				<div[d:grid gtc:repeat(2, 1fr) gtc@lt-sm:1 pt:2 gcg:2rem grg:2rem pl@md:4rem]>
@@ -330,23 +335,35 @@ export tag VignetteCreator
 							if inv.withDescription === true
 								<text-input[pt:3] label="Description (Optional)" bind=inv.result.description>
 
-			<hr[bc:cool1/20 my:8]>
 
-			<div>
-				<.text-lg> "Similar / Acceptable Differentials (max 3)"
-				<span[fs:xs c:cool5]> "What are the 3 conditions that are most similar to this vignette that they are acceptable differntials?"
-
-
-				<div[pt:2]>
-					<multi-select-input[my:2] 
-						required
-						label="Search conditions" 
-						options=conditionOptions 
-						bind=vignette.differentials
-						maxLength=3
-						onChange=updateDifferentials>
+			<vignette-creator-section title="Similar / Acceptable Differentials (max 3)" description="What are the 3 conditions that are most similar to this vignette that they are acceptable differntials?">
+				<multi-select-input[my:2] 
+					required
+					label="Search conditions" 
+					options=conditionOptions 
+					bind=vignette.differentials
+					maxLength=3
+					onChange=updateDifferentials>
 
 
 			<div[mt:8]>
 				<ui-button @click=submitVignette variant="outline">
 					"Submit"
+
+
+
+tag vignette-creator-section
+	prop title\string = ""
+	prop description\string = ""
+
+	css my:2
+
+	<self>
+		<div[py:8]>
+			<.text-lg> title
+			<span[fs:xs c:cool5]> description
+
+			<div[pt:2]>
+				<slot>
+
+		<hr[bc:cool1/20]>
