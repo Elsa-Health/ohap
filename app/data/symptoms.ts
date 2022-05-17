@@ -1,4 +1,17 @@
 import _ from "lodash";
+const painSeverityScale = [
+	"0",
+	"1",
+	"2",
+	"3",
+	"4",
+	"5",
+	"6",
+	"7",
+	"8",
+	"9",
+	"10",
+];
 const symptomsList = [
 	{
 		symptom: "fever",
@@ -23,6 +36,13 @@ const symptomsList = [
 			"light-activity",
 			"cold-weather",
 			"standing-up",
+			"headache",
+			"convulsions",
+			"loss-of-conciousness",
+			"vomiting",
+			"fatigue",
+			"night-sweat",
+			"sweating",
 		],
 		relievers: [
 			"antipyretics",
@@ -64,6 +84,11 @@ const symptomsList = [
 			"exercise",
 			"cold-weather",
 			"non-steroidal-anti-inflammatory-drugs",
+			"pet-dander",
+			"strong-smells",
+			"mold",
+			"mucus",
+			"ACE-inhibitors",
 		],
 		relievers: ["antihistamines", "sleeping", "cough-suppressants"],
 	},
@@ -469,7 +494,7 @@ const symptomsList = [
 		aggravators: [],
 		relievers: [],
 		radiation: ["to-the-back", "to-the-left", "to-the-right", "to-the-front"],
-		severity: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+		severity: painSeverityScale,
 	},
 	{
 		symptom: "otalgia",

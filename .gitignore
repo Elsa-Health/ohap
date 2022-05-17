@@ -2,7 +2,7 @@
 node_modules
 dist
 
-realms.ts
+realm.ts
 notes.txt
 .env
 .vscode
@@ -10,3 +10,4 @@ notes.txt
 
 .vercel
 playwright-report
+app/realm.ts

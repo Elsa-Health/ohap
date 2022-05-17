@@ -13,6 +13,12 @@ const riskFactors = [
 	{ name: "substance-abuse", tags: ["drugs"] },
 	{ name: "organ-transplant", tags: ["transplant", "surgery"] },
 	{ name: "sedentary-lifestyle", tags: ["sitting"] },
+	{ name: "crowded-living conditions", tags: ["overcrowding", "crowds"] },
+	{ name: "livestock-proximity", tags: ["cattle", "farm", "livestock"] },
+	{ name: "no-mosquito-net", tags: ["mosquito", "malaria", "net"] },
+	{ name: "pregnancy", tags: ["pregnant"] },
+	{ name: "extended-antibiotic-use", tags: ["antibiotics", "medication"] },
+	{ name: "aids", tags: ["hiv", "immunocompromised", "immunity"] },
 ];
 
 export default riskFactors;
