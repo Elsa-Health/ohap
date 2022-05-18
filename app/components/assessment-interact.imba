@@ -142,7 +142,6 @@ export tag SymptomInputForm
 		# data.symptoms = data.symptoms.map((do(sy) sy.name == symptomName ? ({ ...sy, [fieldName]: toggleStringList(sy[fieldName])(value)}) : sy))
 	
 	def render
-		console.log "SYMPTIM: ", symptom, data
 		<self>
 			if symptom
 				<div[d:flex jc:space-between]>

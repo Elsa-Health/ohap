@@ -1,7 +1,7 @@
 import medications from '../data/medications.ts'
 import allergies from '../data/allergies.ts'
 import Realm, { datasetsDb } from '../realm.ts'
-import {last} from "lodash"
+import { omit, cloneDeep,last} from "lodash"
 import riskFactors from '../data/riskFactors.ts'
 import {SymptomInputForm} from "../components/assessment-interact"
 import "../components/@ui/input"
@@ -11,6 +11,19 @@ import { friendlySymptomName, toggleStringList, searchForSymptom } from '../util
 import { investigations as invsList } from "../data/investigations.ts"
 
 import symptomsList, { getSymptomByName } from '../data/symptoms'
+
+def flattenToField(collection, field)
+	collection.map do(c) 
+		c[field]
+
+
+def flattenVignetteFields(vignette, fieldValuePairs\[string; string][])
+	const v = cloneDeep(vignette)
+	fieldValuePairs.map do([key, field], idx)
+		console.log "KEY: ", key, field
+		v[key] = flattenToField(v[key], field)
+	v
+
 
 
 let investigationItem = {
@@ -54,12 +67,12 @@ let vignette_template = {
 		}
 	},
 	symptoms: []
-	chiefComplaints: []
+	"chief-complaints": []
 	investigations: []
-	riskFactors: []
+	"risk-factors": []
 	allergies: []
-	recentMedications: []
-	recentInfectedPersonContact: []
+	"recent-medications": []
+	"recent-infected-person-contact": []
 	differentials: []
 }
 
@@ -146,21 +159,33 @@ let getSymptom = getSymptomByName(symptomsList)
 let evidenceSearchStr = ""
 
 export tag VignetteCreator
+	prop isLocked\boolean = false
+	prop defaultState
 
 	css pb:30
 	css .fluid-grid d:grid gtc@lg:repeat(4, 1fr) gtc:repeat(1, 1fr) gcg:1.2rem grg:1.2rem
+	# css .locked pe:none
 
 	def mount
 		const pathname = window.location.pathname.split("/")
 		corpusId = last(pathname.slice(0, pathname.length - 1))
-		console.log corpusId
+
+		if defaultState && typeof defaultState === "object"
+			vignette = {
+				...JSON.parse(JSON.stringify(vignette_template))
+				...defaultState
+			}
+
+		tick!
+
+	def unmount
+		vignette = JSON.parse(JSON.stringify(vignette_template))
 
 
 	def selectEvidence evidence
-		console.log evidence
+		return
 
 	def updateSymptoms symptoms
-		console.log symptoms
 		# create new symptom
 		let res = symptoms.map do(sy)
 			let name = sy.symptom || sy.name
@@ -186,10 +211,11 @@ export tag VignetteCreator
 
 	def updateInvestigations investigations
 		# vignette.investigations = investigations
-		console.log "updates", investigations
+		# console.log "updates", investigations
+		return
 
 	def updateDifferentials diff
-		console.log diff
+		return
 
 	def removeSymptom symptomName
 		vignette.symptoms = vignette.symptoms.filter do(sy)
@@ -205,7 +231,13 @@ export tag VignetteCreator
 
 
 	def submitVignette
-		console.log vignette
+		const data = {
+			...flattenVignetteFields(vignette, [["risk-factors", "value"], ["recent-medications", "value"], ["recent-infected-person-contact", "value"], ["allergies", "value"], ["differentials", "value"]]),
+			investigations: omit vignette.investigations, ["value", "label"]
+			createdAt: new Date(),
+			updatedAt: new Date()
+		}
+		console.log data
 		if !completeFields(vignette)
 			window.alert "Please enter all the required fields"
 			return;
@@ -214,7 +246,7 @@ export tag VignetteCreator
 		const confirmed = window.confirm "Please confirm that you are submitting the vignette?"
 
 		try
-			const result = await datasetsDb.updateOne({ _id: new Realm.BSON.ObjectID(corpusId) }, {$addToSet: { "data.vignettes": {...vignette, createdAt: new Date(), updatedAt: new Date()} }})
+			const result = await datasetsDb.updateOne({ _id: new Realm.BSON.ObjectID(corpusId) }, {$addToSet: { "data.vignettes": {...data} }})
 
 			window.alert "Successfully created new vignette!"
 			vignette = { ...vignette_template }
@@ -223,12 +255,8 @@ export tag VignetteCreator
 			window.alert "There was an error creating the new vignette. Please contact support."
 
 
-		console.log vignette, confirmed
-
 	def render
-		# const testNames = vignette.investigations.map((do(itm) itm.label))
-		console.log getSymptom("abdominal-pain")
-		<self>
+		<self [pe:{isLocked ? "none": "inherit"}]>
 			<.text-3xl[lh:normal]> "Condition Vignette Creator"
 			<[c:cool6]> "Use this form to create clinical case vignettes for any of the conditions supported by the platform."
 
@@ -248,7 +276,7 @@ export tag VignetteCreator
 					<select-input required options=sexOptions bind=vignette.sex labelKey="label" label="Sex">
 					<text-input required label="Country" bind=vignette.country>
 					<number-input required=yes bind=vignette.height.value label="Height (cm)">
-					<number-input required=yes bind=vignette.weight.value label="Weight (kg)">
+					<number-input required=yes bind=vignette.weight.value label="Weight (kgs)">
 			
 
 			<vignette-creator-section title="Patient Vitals" description="Patient vital information you expect to see.">
@@ -274,7 +302,7 @@ export tag VignetteCreator
 				<div[d:grid gtc:repeat(2, 1fr) gtc@lt-sm:1 pt:2 gcg:2rem grg:2rem pl@md:4rem]>
 					for sym in vignette.symptoms
 						<div[bgc:cool1 p:2rem rd:md]>
-							<SymptomInputForm bind:isChiefComplaint=vignette.chiefComplaints remove=removeSymptom symptom=getSymptom(sym.name) remove=removeSymptom bind=sym >
+							<SymptomInputForm bind:isChiefComplaint=vignette["chief-complaints"] remove=removeSymptom symptom=getSymptom(sym.name) remove=removeSymptom bind=sym >
 
 			<vignette-creator-section title="Risk Factors" description="Are there risk factors associated with this particular vignette?">
 				<multi-select-input[my:2] 
@@ -283,14 +311,14 @@ export tag VignetteCreator
 					# labelKey="value"
 					options=riskFactors.map((do(rf) { ...rf, value: rf.name, label: friendlySymptomName rf.name })) 
 					onChange=console.log
-					bind=vignette.riskFactors>
+					bind=vignette["risk-factors"]>
 
 			<vignette-creator-section title="Recent infected person contact?" description="Does the patient report contact with a patient suffering from a disease?">
 				<multi-select-input[my:2] 
 					required
 					label="Search conditions" 
 					options=conditionOptions 
-					bind=vignette.recentInfectedPersonContact
+					bind=vignette["recent-infected-person-contact"]
 					# onChange=updateDifferentials
 					>
 
@@ -311,7 +339,7 @@ export tag VignetteCreator
 					# labelKey="value"
 					options=medications.map((do(rf) { ...rf, value: rf.name, label: friendlySymptomName rf.name })) 
 					onChange=console.log
-					bind=vignette.recentMedications>
+					bind=vignette["recent-medications"]>
 
 			<vignette-creator-section title="Tests & Investigations" description="What were the tests done and the results of those tests">
 				<multi-select-input[my:2] 
@@ -346,7 +374,7 @@ export tag VignetteCreator
 					onChange=updateDifferentials>
 
 
-			<div[mt:8]>
+			<div[mt:8 d:{isLocked ? "none" : "block"}]>
 				<ui-button @click=submitVignette variant="outline">
 					"Submit"
 

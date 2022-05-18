@@ -25,4 +25,8 @@ const allergies = [
 	{ name: "chemotherapy-drugs", tags: ["chemotherapy", "cancer"] },
 ];
 
+export function getAllergyByName(name: string) {
+	return allergies.find((r) => r.name === name) || {};
+}
+
 export default allergies;

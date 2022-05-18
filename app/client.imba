@@ -2,6 +2,7 @@ import { DatasetSummary } from './screens/DatasetSummary'
 import { CreateDataset } from './screens/create-dataset'
 import { ConfirmAccount } from './screens/confirm-account'
 import { VignetteCreator } from './screens/vignette-creator'
+import { VignetteViewer } from "./screens/vignette-viewer"
 import { Profile } from './screens/Profile'
 import { UpdateProfile } from './screens/UpdateProfile'
 import { ExploreData } from './screens/ExploreData'
@@ -84,8 +85,12 @@ tag app
 			<div.container route="/datasets/view/:id$">
 				<DatasetSummary>
 
-			<div.container route="/datasets/view/:id/create-vignette">
-				<VignetteCreator>
+			<div.container route="/datasets/view/:id/create-vignette$">
+				<VignetteCreator isLocked=false>
+
+			<div.container route="/datasets/view/:cid/:vid">
+				<VignetteViewer>
+
 
 			<div.container route="/datasets/create-dataset$">
 				<CreateDataset>

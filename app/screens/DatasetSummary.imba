@@ -56,7 +56,7 @@ export tag DatasetSummary
 						css tr bgc@even:cool2/50;
 
 						<table-ui headers=["Condition", "Presentation", "Age", "Sex", "Actions"]>
-							for vign in corpus.data.vignettes
+							for vign, idx in corpus.data.vignettes
 								<tr[py:2rem]>
 									<td> friendlySymptomName vign.condition
 									<td> vign.presentation
@@ -64,7 +64,7 @@ export tag DatasetSummary
 									<td> upperFirst vign.sex
 									<td[d:flex]> 
 										<ui-button variant="subtle"> "Delete"
-										<ui-button variant="subtle"> "Open"
+										<ui-button route-to="{idx}" variant="subtle"> "Open"
 
 
 
