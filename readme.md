@@ -13,13 +13,13 @@ The community is open and inviting to all and any contributors, and can be found
 Clone the project
 
 ```bash
-  git clone https://github.com/Elsa-Health/modelling-ui
+  git clone git@github.com:Elsa-Health/ohap.git
 ```
 
 Go to the project directory
 
 ```bash
-  cd modelling-ui
+  cd ohap
 ```
 
 Install dependencies

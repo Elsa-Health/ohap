@@ -512,10 +512,6 @@ export const investigations: Array<investigation> = [
 	},
 ];
 
-// FIXME: There is a duplicate of creatinine
-// FIXME: The investigations need to be updated to support panel/battery tests
-// FIXME: Blood pressure needs systolic and diastolic
-
 export const normalityRangeItems = ["high", "normal", "low"];
 
 export const inputInvestigations = investigations.map((value: unknown, _) => {
