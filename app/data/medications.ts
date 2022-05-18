@@ -397,4 +397,8 @@ const medications = [
 	},
 ];
 
+export function getMedicationByName(name: string) {
+	return medications.find((r) => r.name === name) || {};
+}
+
 export default medications;

@@ -21,4 +21,8 @@ const riskFactors = [
 	{ name: "aids", tags: ["hiv", "immunocompromised", "immunity"] },
 ];
 
+export function getFactorByName(name: string) {
+	return riskFactors.find((r) => r.name === name) || {};
+}
+
 export default riskFactors;
