@@ -2,11 +2,11 @@
 node_modules
 dist
 
-realm.ts
 notes.txt
 .env
 .vscode
 .nyc*
+_dist_esm
 
 .vercel
 playwright-report
