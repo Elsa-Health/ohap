@@ -1,12 +1,12 @@
 
 
 tag Hero
-	css my@md:26vh my@lt-md:16vh px@lt-md:2
+	# css my@md:26vh my@lt-md:16vh px@lt-md:2
 
-		button bd:1px solid #ccc bg:white mx:4 rd:lg px:10 py:5 cursor@hover:pointer shadow@hover:md fs:large fs:x-large
+	css	button bd:1px solid #ccc bg:white mx:4 rd:lg px:10 py:5 cursor@hover:pointer shadow@hover:md fs:large fs:x-large
 		
 		# .cta background-size:200% auto; bgi:linear-gradient(to right, $light-blue 0%, #98dcd5  51%, $light-blue  100%) 
-		.cta 
+	css .cta 
 			background-size:200% auto; 
 			bgi:linear-gradient(91.03deg, $blue 14.64%, rgba(75, 184, 233, 0.5) 99.45%), linear-gradient(91.03deg, $blue 14.64%, rgba(75, 184, 233, 0.5) 99.45%) 
 			color:white
@@ -37,6 +37,8 @@ tag Hero
 					"Things are changing often, so expect many suprises until v 0.1."
 
 export tag Home
+	css py@md:20vh py@lt-md:16vh px@lt-md:2
+	css background-color: #ffffff background-image: url("data:image/svg+xml,%3Csvg width='20' height='20' viewBox='0 0 20 20' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%230e3edb' fill-opacity='0.03' fill-rule='evenodd'%3E%3Ccircle cx='3' cy='3' r='3'/%3E%3Ccircle cx='13' cy='13' r='3'/%3E%3C/g%3E%3C/svg%3E");
 	def render
 		<self>
 			<Hero>
