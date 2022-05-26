@@ -12,6 +12,7 @@
 		<link rel="preconnect" href="https://fonts.googleapis.com" />
 		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css" />
+		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 		<style>
 			:root { --blue:#4665AF; --purple:#8456A3; --pink:#F1709B; --light-blue:#4BB8E9; --color-light:#fff; --primary:#4665AF }
 
@@ -74,6 +75,32 @@
 			button.is-primary {
 				background-color: var(--primary) !important;
 			}
+
+			.footer {
+				position: fixed;
+				padding: 1rem;
+				bottom: 0;
+				width: 100%;
+				height: 2rem;
+				color: #bfbfbf;
+				font-size: 1rem;
+				
+			}
+
+			.info {
+				float: left;
+				margin-left: 2rem;
+			}
+
+			.social {
+				float: right;
+				margin-right: 5rem;
+			}
+			.fa {
+				font-size: 1.2rem;
+				color: #bfbfbf;
+				padding-left: 2rem;
+			}
 		</style>
 		<!-- reference to the client script styles -->
 		<style src="*"></style>
@@ -82,4 +109,17 @@
 		<!-- reference to the client script -->
 		<script type="module" src="./client.imba"></script>
 	</body>
+	<footer class="footer">
+		<span class="info">&copy; 
+			<script>document.write(new Date().getFullYear());</script>
+			Elsa Health Inc. All rights reserved. 
+		</span>
+		<div class="social">
+			<a href="#"><i class="fa fa-facebook"></i></a>
+			<a href="#"><i class="fa fa-instagram"></i></a>
+			<a href="#"><i class="fa fa-twitter"></i></a>
+			<a href="#"><i class="fa fa-github"></i></a>
+			<a href="#"><i class="fa fa-dribbble"></i></a>
+		</div>
+	</footer>
 </html>
