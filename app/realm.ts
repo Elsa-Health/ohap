@@ -2,9 +2,9 @@
 
 import * as Realm from "realm-web";
 
-const realm_app_id = process.env.REALM_APP_ID;
-const CLUSTER_NAME = process.env.CLUSTER_NAME;
-const DB_NAME = process.env.DB_NAME;
+const realm_app_id = "process.env.REALM_APP_ID";
+const CLUSTER_NAME = "process.env.CLUSTER_NAME";
+const DB_NAME = "process.env.DB_NAME";
 
 export const app = new Realm.App({ id: realm_app_id });
 export default Realm;

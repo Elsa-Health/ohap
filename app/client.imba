@@ -117,5 +117,6 @@ tag app
 			<div route="/playground$">
 				<Playground>
 
+			<footer.footer>
 
 imba.mount <app>
